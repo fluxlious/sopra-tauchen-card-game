@@ -1,7 +1,7 @@
-package tools.aqua.bgw.examples.war.service
+package service
 
-import tools.aqua.bgw.examples.war.entity.CardSuit
-import tools.aqua.bgw.examples.war.entity.CardValue
+import entity.CardSuit
+import entity.CardValue
 import tools.aqua.bgw.visual.ImageVisual
 
 /**
