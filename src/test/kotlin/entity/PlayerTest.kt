@@ -14,7 +14,6 @@ class PlayerTest{
      */
     @Test
     fun testPlayerInitialization(){
-        //Test the players' initial properties
         assertEquals("Alex", testPlayer.name)
         assertEquals(0, testPlayer.score)
         assertEquals(false, testPlayer.hasSwapped)
