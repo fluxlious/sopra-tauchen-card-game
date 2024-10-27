@@ -30,7 +30,7 @@ class TauchenTest {
      */
     @Test
     fun testPlayerSwitching(){
-        //Test for switching the player
+
         assertEquals(0, testGame.currentPlayer)
 
         // Switch to next player
@@ -49,6 +49,7 @@ class TauchenTest {
     @Test
     fun testMovingCardToMiddle(){
         val aceOfHearts = Card(CardSuit.HEARTS,CardValue.ACE)
+
         testGame.middleCards.add(aceOfHearts)
         assertEquals(1,testGame.middleCards.size, "Middle cards should contain 1 card")
         assertEquals(aceOfHearts,testGame.middleCards[0], "The first card in the middle should be aceOfHearts")

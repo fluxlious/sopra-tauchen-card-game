@@ -15,7 +15,7 @@ class CardTest{
     private val kingOfDiamonds = Card(CardSuit.DIAMONDS,CardValue.KING)
 
     /**
-     * Tests the initial properties of the [Card] instance by accessing its suit and value directly
+     * Tests the properties of the [Card] instance by accessing its suit and value directly
      */
     @Test
     fun testCardInitialization(){
@@ -24,7 +24,7 @@ class CardTest{
 
     }
     /**
-     * Tests the initial properties of the [Card] instance by comparing [toString] representations
+     * Tests the properties of the [Card] instance by comparing [toString] representations
      */
     @Test
     fun testCardInitializationWithToString(){
