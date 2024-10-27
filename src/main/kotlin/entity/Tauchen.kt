@@ -16,8 +16,8 @@ import java.util.*
 class Tauchen(var currentPlayer: Int = 0, val players : List<Player>) {
 
     val drawPile: Stack<Card> = Stack()
-    var middleCards: MutableList<Card> = mutableListOf()
-    var discardPile: Stack<Card> = Stack()
+    val middleCards: MutableList<Card> = mutableListOf()
+    val discardPile: Stack<Card> = Stack()
 
 }
 

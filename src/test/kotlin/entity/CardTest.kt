@@ -1,7 +1,6 @@
 package entity
 
-import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.Test
+import kotlin.test.*
 /**
  * Unit tests for the [Card] class, covering initialisations and properties of the [Card]
  * and equality checks of two [Card]s\
@@ -44,7 +43,6 @@ class CardTest{
      */
     @Test
     fun testCardsInequalityUsingToString(){
-        // Test inequality by comparing the string representations
         assertNotEquals(aceOfDiamonds.toString(),kingOfDiamonds.toString())
     }
 

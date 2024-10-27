@@ -1,8 +1,7 @@
 package entity
 
-import org.junit.jupiter.api.Test
 
-import org.junit.jupiter.api.Assertions.*
+import kotlin.test.*
 /**
  * Unit tests for the [Tauchen] class, covering default initialisations, player switching
  * and operations with card piles
@@ -48,9 +47,11 @@ class TauchenTest {
      */
     @Test
     fun testMovingCardToMiddle(){
-        val aceOfHearts = Card(CardSuit.HEARTS,CardValue.ACE)
+        val aceOfHearts = Card(CardSuit.HEARTS, CardValue.ACE)
 
+        //Add the created card to the middleCards list
         testGame.middleCards.add(aceOfHearts)
+        //Test if the created card in the middleCards
         assertEquals(1,testGame.middleCards.size, "Middle cards should contain 1 card")
         assertEquals(aceOfHearts,testGame.middleCards[0], "The first card in the middle should be aceOfHearts")
 
@@ -63,11 +64,13 @@ class TauchenTest {
     fun testMovingCardToDiscardPile(){
         val kingOfSpades = Card(CardSuit.SPADES, CardValue.KING)
 
+        //Push the created card to the top of the discardPile
         testGame.discardPile.push(kingOfSpades)
+        //Test if the created card in the discardPile
         assertEquals(1,testGame.discardPile.size, "Discard pile should contain 1 card after push")
         assertEquals(kingOfSpades,testGame.discardPile.peek(), "Top of the DiscardPile should be kingOfSpades")
         testGame.discardPile.pop()
-
+        //Test if the card is popped out of discardPile
         assertTrue(testGame.discardPile.isEmpty(), "Discard pile should be empty after pop")
 
     }

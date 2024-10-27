@@ -1,6 +1,5 @@
 package entity
 
-import org.junit.jupiter.api.Assertions.*
 import kotlin.test.*
 /**
  * Unit tests for the [Player] class, covering initialisations and default properties
