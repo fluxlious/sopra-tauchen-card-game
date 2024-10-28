@@ -16,7 +16,7 @@ class TauchenTest {
     @Test
     fun testGameInitialization(){
         //Test the Tauchen's properties after game initialization
-        assertEquals(0,testGame.currentPlayer)
+        assertEquals(0,testGame.currentPlayerIndex)
         assertEquals(2,testGame.players.size)
         assertTrue(testGame.drawPile.isEmpty(), "Draw pile should be empty initially")
         assertTrue(testGame.middleCards.isEmpty(), "Middle cards should be empty initially")
@@ -30,15 +30,15 @@ class TauchenTest {
     @Test
     fun testPlayerSwitching(){
 
-        assertEquals(0, testGame.currentPlayer)
+        assertEquals(0, testGame.currentPlayerIndex)
 
         // Switch to next player
-        testGame.currentPlayer = (testGame.currentPlayer + 1) % testGame.players.size
-        assertEquals(1, testGame.currentPlayer)
+        testGame.currentPlayerIndex = (testGame.currentPlayerIndex + 1) % testGame.players.size
+        assertEquals(1, testGame.currentPlayerIndex)
 
         // Switch back to the first player
-        testGame.currentPlayer= (testGame.currentPlayer + 1) % testGame.players.size
-        assertEquals(0, testGame.currentPlayer)
+        testGame.currentPlayerIndex= (testGame.currentPlayerIndex + 1) % testGame.players.size
+        assertEquals(0, testGame.currentPlayerIndex)
 
 
     }
