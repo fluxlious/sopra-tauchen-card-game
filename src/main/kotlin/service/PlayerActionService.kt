@@ -28,11 +28,11 @@ class PlayerActionService(private val rootService: RootService) {
             }
         }
 
-        //if the card is valid, play it to the middle
+        //If the card is valid, play it to the middle
         middleCards.add(card)
         currentPlayer.hand.remove(card)
 
-        //check trio formation if there are three cards in the middle after playing the card
+        //Check trio formation if there are three cards in the middle after playing the card
         if(middleCards.size == 3){
             takeTrio()
         }
@@ -59,18 +59,40 @@ class PlayerActionService(private val rootService: RootService) {
         val currentPlayer = game.players[game.currentPlayerIndex]  // Access currentPlayer within method
         val middleCards = game.middleCards                          // Access middleCards within method
         //move middle
-        middleCards.addAll(currentPlayer.scoringPile)
+        currentPlayer.scoringPile.addAll(middleCards)
         middleCards.clear()
     }
     internal fun playLastCard(card: Card){}
     internal fun drawCard(){
+        val currentPlayer = game.players[game.currentPlayerIndex]
+        val middleCards = game.middleCards
+        val drawPile = game.drawPile
+        if(!currentPlayer.hasSwapped){
+        //TODO drawCard logikini bitir bunu yaparken playLastCard i da implemente etmek lazim
+
+        }
+        else{
+            throw IllegalStateException("You already swapped this round")
+        }
+        currentPlayer.hasSwapped = false
 
 
     }
     internal fun swapCard() {}
-    internal fun discardCard(){}
+    internal fun discardCard(card: Card) {
+        val currentPlayer = game.players[game.currentPlayerIndex]
+        if(currentPlayer.hand.contains(card)){
+            currentPlayer.hand.remove(card)
+            game.discardPile.push(card)
+        }
+        else{
+            throw IllegalArgumentException("Player doesnt have the card ${card.toString()} in the hand")
+        }
+
+    }
 
     internal fun nextTurn(){
         game.currentPlayerIndex = (game.currentPlayerIndex + 1) % game.players.size
+        println("Turn changes to ${game.players[game.currentPlayerIndex].name}")
     }
 }
