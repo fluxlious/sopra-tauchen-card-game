@@ -23,6 +23,7 @@ class Player (var name : String){
 
     val hand: MutableList<Card> = mutableListOf()
     var swapCard: Card? = null
+
     val scoringPile: MutableList<List<Card>> = mutableListOf()
 
     init {

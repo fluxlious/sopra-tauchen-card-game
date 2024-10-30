@@ -19,9 +19,7 @@ class Tauchen(var currentPlayerIndex: Int = 0, val players : List<Player>) {
     val middleCards: MutableList<Card> = mutableListOf()
     val discardPile: Stack<Card> = Stack()
 
-    init {
-        require(players.size == 2) {"Game requires exactly two players"}
-    }
+
 
 
 }

@@ -13,9 +13,9 @@ class PlayerActionService(private val rootService: RootService) {
         get() = game.players[game.currentPlayerIndex]
 
     internal fun playCard(card: Card){
-        val currentPlayer = game.players[game.currentPlayerIndex]  // Access currentPlayer within method
-        val middleCards = game.middleCards                          // Access middleCards within method
-
+        if(!currentPlayer.hand.contains(card)){
+            throw IllegalArgumentException("The card should be in the players hand")
+        }
 
         // Check if the middle is playable
         if (middleCards.isNotEmpty() && middleCards.size < 3) {
@@ -36,7 +36,7 @@ class PlayerActionService(private val rootService: RootService) {
         if(middleCards.size == 3){
             takeTrio()
         }
-        nextTurn()
+        //nextTurn()
     }
 
     private fun takeTrio() {
@@ -46,7 +46,7 @@ class PlayerActionService(private val rootService: RootService) {
         val isValueTrio = middleCards.all({ it.value == middleCards.first().value})
         //They form value trio
         if(isValueTrio){
-            currentPlayer.score =+ 20
+            currentPlayer.score += 20
 
         }
         //They form suit trio
@@ -56,11 +56,10 @@ class PlayerActionService(private val rootService: RootService) {
         addCardsToScoringPile(currentPlayer)
     }
     private fun addCardsToScoringPile(currentPlayer : Player) {
-        val currentPlayer = game.players[game.currentPlayerIndex]  // Access currentPlayer within method
-        val middleCards = game.middleCards // Access middleCards within method
 
-        //move middle
-        currentPlayer.scoringPile.add(middleCards.toList())
+        val trio = middleCards.toList()
+        currentPlayer.scoringPile.add(trio)
+        println("${currentPlayer.name} has ${trio.toString()}  in the scoring pile")
         middleCards.clear()
     }
 
@@ -68,24 +67,29 @@ class PlayerActionService(private val rootService: RootService) {
 
 
     internal fun drawCard(){
-        val currentPlayer = game.players[game.currentPlayerIndex]
-        val middleCards = game.middleCards
-        val drawPile = game.drawPile
+        // Check if the player has 8 cards or fewer in hand
+        if (currentPlayer.hand.size > 8) {
+            throw IllegalStateException("Cannot draw a card: Player already has more than 8 cards in hand.")
+        }
+        val drawnCard = game.drawPile.pop()
+
+
+
+
+
+
+    }
+    internal fun swapCard() {
         if(!currentPlayer.hasSwapped){
-        //TODO drawCard logikini bitir bunu yaparken playLastCard i da implemente etmek lazim
 
         }
         else{
             throw IllegalStateException("You already swapped this round")
         }
         currentPlayer.hasSwapped = false
-
-
     }
-    internal fun swapCard() {}
     internal fun discardCard(card: Card) {
-        val currentPlayer = game.players[game.currentPlayerIndex]
-        if(currentPlayer.hand.contains(card)){
+        if(currentPlayer.hand.contains(card) && currentPlayer.hand.size > 8){
             currentPlayer.hand.remove(card)
             game.discardPile.push(card)
         }

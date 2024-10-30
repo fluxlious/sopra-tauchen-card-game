@@ -4,7 +4,7 @@ import kotlin.test.*
 
 
 class GameServiceTest{
-    val service = GameService(RootService())
+    private val service = GameService(RootService())
     @Test
     fun testStartNewGame(){
         service.startNewGame(listOf("Cem", "Can"))
@@ -17,7 +17,7 @@ class GameServiceTest{
 
 
         //Checks if the drawPile is shuffled by comparing with a standard deck
-        //assertNotEquals(service.game.drawPile, service.createStandardDeck())
+        assertNotEquals(service.game.drawPile, service.createStandardDeck())
 
         //Checks if both players have 5 cards in the hand
         service.game.players.forEach { player ->
@@ -27,8 +27,13 @@ class GameServiceTest{
         println(service.game.drawPile)
         //Checks if the drawPile has 42 cards after the cards are dealt
         assertEquals(42, service.game.drawPile.size)
-        println(service.game.currentPlayerIndex)
+        //Checks the boundary of currentPlayerIndex either 0 or 1
+        assertTrue(service.game.currentPlayerIndex == 0  || service.game.currentPlayerIndex == 1)
+
+        assertTrue(service.game.players.all { player -> player.scoringPile.isEmpty() })
+
     }
+
 
 
 }

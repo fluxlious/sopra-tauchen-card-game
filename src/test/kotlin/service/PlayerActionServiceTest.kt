@@ -31,16 +31,15 @@ class PlayerActionServiceTest {
         currentPlayer.hand.clear()
         currentPlayer.hand.add(compatibleCard)
 
-
+        println("Player has ${currentPlayer.hand} before trio ")
+        println("Middle card has ${game.middleCards} before trio ")
         playerActionService.playCard(compatibleCard)
-
+        println("Player has ${currentPlayer.hand} post trio ")
 
         assertFalse(currentPlayer.hand.contains(compatibleCard), "The card should be removed from player's hand")
-        assertEquals(0, game.middleCards.size)
-        assertNotEquals(5,currentPlayer.score)
-        assertEquals(20,currentPlayer.score)
-        println(currentPlayer.scoringPile)
-        assertEquals(3, currentPlayer.scoringPile.size)
+        assertEquals(0, game.middleCards.size)//post-trio middle should be empty
+        assertEquals(20,currentPlayer.score)//post-trio score should be 20
+        assertEquals(1, currentPlayer.scoringPile.size)//post-trio scoringPile should have one trio
     }
     @Test
     fun testPlayCardWithSuitTrio() {
@@ -61,15 +60,17 @@ class PlayerActionServiceTest {
         currentPlayer.hand.add(compatibleCard)
 
 
+        println("Player has ${currentPlayer.hand} before trio ")
+        println("Middle card has ${game.middleCards} before trio ")
         playerActionService.playCard(compatibleCard)
-
+        println("Player has ${currentPlayer.hand} post trio ")
 
         assertFalse(currentPlayer.hand.contains(compatibleCard), "The card should be removed from player's hand")
         assertEquals(0, game.middleCards.size)
         assertNotEquals(20,currentPlayer.score)
         assertEquals(5,currentPlayer.score)
         println(currentPlayer.scoringPile)
-        assertEquals(3, currentPlayer.scoringPile.size)
+        assertEquals(1, currentPlayer.scoringPile.size)
     }
     @Test
     fun testPlayCardOnEmptyMiddle() {
@@ -97,9 +98,11 @@ class PlayerActionServiceTest {
         val playerActionService = rootService.PlayerActionService
 
         currentPlayer.hand.clear()
-        val middleCard = listOf(Card(CardSuit.HEARTS, CardValue.TEN),
+        val middleCardTest = listOf(Card(CardSuit.HEARTS, CardValue.TEN),
                                 Card(CardSuit.SPADES, CardValue.TEN))
-        game.middleCards.addAll(middleCard)
+        //add the custom middle to the middle
+        game.middleCards.addAll(middleCardTest)
+
         println(game.middleCards)
         val incompatibleCard = Card(CardSuit.CLUBS, CardValue.TWO)
         currentPlayer.hand.add(incompatibleCard)
@@ -137,17 +140,15 @@ class PlayerActionServiceTest {
         val game = rootService.GameService.game
         val currentPlayer = game.players[game.currentPlayerIndex]
         val playerActionService = rootService.PlayerActionService
-        val randomCardfromHand = currentPlayer.hand.random()
-        playerActionService.discardCard(randomCardfromHand)
-        assertFalse(currentPlayer.hand.contains(randomCardfromHand))
-        assertTrue(game.discardPile.contains(randomCardfromHand))
+        val randomFiveCards = mutableListOf(Card(CardSuit.HEARTS, CardValue.THREE),Card(CardSuit.SPADES, CardValue.TWO),Card(CardSuit.SPADES, CardValue.TEN),Card(CardSuit.SPADES, CardValue.NINE))
+        currentPlayer.hand.addAll(randomFiveCards)
+        println(currentPlayer.hand.toString())
+        val discardedCard = Card(CardSuit.HEARTS, CardValue.THREE)
+        playerActionService.discardCard(discardedCard)
+        println(currentPlayer.hand.toString())
+        assertFalse(currentPlayer.hand.contains(discardedCard))
+        assertTrue(game.discardPile.contains(discardedCard))
     }
-    @Test
-    fun testDiscardCardUnsuccessful(){
+}
 
-        val game = rootService.GameService.game
-        val currentPlayer = game.players[game.currentPlayerIndex]
-        val playerActionService = rootService.PlayerActionService
-        //TODO testDiscardCardUnsuccessful bitmedi daha bi de testler asiri karisti onlari toparla
-    }
-    }
+
