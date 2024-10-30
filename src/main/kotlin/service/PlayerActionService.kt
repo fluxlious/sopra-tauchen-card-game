@@ -57,12 +57,16 @@ class PlayerActionService(private val rootService: RootService) {
     }
     private fun addCardsToScoringPile(currentPlayer : Player) {
         val currentPlayer = game.players[game.currentPlayerIndex]  // Access currentPlayer within method
-        val middleCards = game.middleCards                          // Access middleCards within method
+        val middleCards = game.middleCards // Access middleCards within method
+
         //move middle
-        currentPlayer.scoringPile.addAll(middleCards)
+        currentPlayer.scoringPile.add(middleCards.toList())
         middleCards.clear()
     }
+
     internal fun playLastCard(card: Card){}
+
+
     internal fun drawCard(){
         val currentPlayer = game.players[game.currentPlayerIndex]
         val middleCards = game.middleCards

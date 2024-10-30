@@ -3,7 +3,7 @@ package entity
 import kotlin.test.*
 /**
  * Unit tests for the [Card] class, covering initialisations and properties of the [Card]
- * and equality checks of two [Card]s\
+ * and equality checks of two [Card]s
  */
 
 class CardTest{
@@ -17,7 +17,7 @@ class CardTest{
      * Tests the properties of the [Card] instance by accessing its suit and value directly
      */
     @Test
-    fun testCardInitialization(){
+    fun testCardInitializationByValue() {
         assertEquals(CardSuit.DIAMONDS, aceOfDiamonds.suit)
         assertEquals(CardValue.ACE, aceOfDiamonds.value)
 
@@ -26,7 +26,7 @@ class CardTest{
      * Tests the properties of the [Card] instance by comparing [toString] representations
      */
     @Test
-    fun testCardInitializationWithToString(){
+    fun testCardInitializationUsingToString(){
         assertEquals("♦",aceOfDiamonds.suit.toString())
         assertEquals("A",aceOfDiamonds.value.toString())
     }

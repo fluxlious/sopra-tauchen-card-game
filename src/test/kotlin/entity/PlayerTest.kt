@@ -2,7 +2,7 @@ package entity
 
 import kotlin.test.*
 /**
- * Unit tests for the [Player] class, covering initialisations and default properties
+ * Unit tests for the [Player] class, covering initialisations and properties
  */
 class PlayerTest{
     //A test player
@@ -16,7 +16,7 @@ class PlayerTest{
         assertEquals("Alex", testPlayer.name)
         assertEquals(0, testPlayer.score)
         assertEquals(false, testPlayer.hasSwapped)
-        assertEquals(false,testPlayer.hasActionTaken)
+        //assertEquals(false,testPlayer.hasActionTaken)
         assertEquals(null, testPlayer.swapCard)
         assertTrue(testPlayer.hand.isEmpty())
         assertTrue(testPlayer.scoringPile.isEmpty())

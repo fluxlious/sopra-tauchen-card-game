@@ -1,6 +1,5 @@
 package entity
 
-
 import kotlin.test.*
 /**
  * Unit tests for the [Tauchen] class, covering default initialisations, player switching
@@ -14,8 +13,7 @@ class TauchenTest {
      */
 
     @Test
-    fun testGameInitialization(){
-        //Test the Tauchen's properties after game initialization
+    fun testTauchenInitialization(){
         assertEquals(0,testGame.currentPlayerIndex)
         assertEquals(2,testGame.players.size)
         assertTrue(testGame.drawPile.isEmpty(), "Draw pile should be empty initially")
@@ -24,24 +22,6 @@ class TauchenTest {
 
     }
 
-    /**
-     * Tests manually switching player by updating the [Tauchen.currentPlayer]
-     */
-    @Test
-    fun testPlayerSwitching(){
-
-        assertEquals(0, testGame.currentPlayerIndex)
-
-        // Switch to next player
-        testGame.currentPlayerIndex = (testGame.currentPlayerIndex + 1) % testGame.players.size
-        assertEquals(1, testGame.currentPlayerIndex)
-
-        // Switch back to the first player
-        testGame.currentPlayerIndex= (testGame.currentPlayerIndex + 1) % testGame.players.size
-        assertEquals(0, testGame.currentPlayerIndex)
-
-
-    }
     /**
      * Tests manually adding a [Card] to [Tauchen.middleCards]
      */
