@@ -6,10 +6,10 @@ import kotlin.random.Random
 
 
 class GameService(rootService: RootService) {
-    //initialize the game object with an empty list of players
     var game: Tauchen = Tauchen(0, listOf())
+    //initialize the game object with an empty list of players
     internal fun startNewGame(playerNames : List<String>) {
-
+        var game: Tauchen = Tauchen(0, listOf())
         if(playerNames.size !=2) {
             throw IllegalArgumentException("Player list must have 2 players")
         }

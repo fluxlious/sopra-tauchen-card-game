@@ -19,7 +19,7 @@ class Player (var name : String){
     var score : Int = 0
 
     var hasSwapped : Boolean = false
-    //var hasActionTaken : Boolean = false
+    var hasActionTaken : Boolean = false
 
     val hand: MutableList<Card> = mutableListOf()
     var swapCard: Card? = null

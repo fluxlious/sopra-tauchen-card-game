@@ -101,6 +101,7 @@ class PlayerActionService(private val rootService: RootService) {
 
     internal fun nextTurn(){
         game.currentPlayerIndex = (game.currentPlayerIndex + 1) % game.players.size
+
         println("Turn changes to ${game.players[game.currentPlayerIndex].name}")
     }
 }
