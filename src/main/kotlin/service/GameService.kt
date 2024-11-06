@@ -5,10 +5,10 @@ import java.util.Stack
 import kotlin.random.Random
 
 
-class GameService(rootService: RootService) {
+class GameService(private val rootService: RootService) : AbstractRefreshingService() {
     //initialize the game object with an empty list of players
-    var game: Tauchen = Tauchen(0, listOf())
-    internal fun startNewGame(playerNames : List<String>) {
+
+    fun startNewGame(playerNames : List<String>) {
 
         if(playerNames.size !=2) {
             throw IllegalArgumentException("Player list must have 2 players")
@@ -25,7 +25,7 @@ class GameService(rootService: RootService) {
         val players = listOf(Player(playerNames[0]), Player(playerNames[1]))
 
         //Initialise the game with initialised players
-        game = Tauchen(0,players)
+        val game: Tauchen = Tauchen(0, players)
 
         //Shuffle the standardDeck and put the shuffled cards into drawPile
         game.drawPile.addAll(createStandardDeck().shuffled())
@@ -36,13 +36,32 @@ class GameService(rootService: RootService) {
                 player.hand.add(game.drawPile.pop())
             }
         }
+        rootService.currentGame = game
         game.currentPlayerIndex= Random.nextInt(players.size)
         println("${players[game.currentPlayerIndex].name} starts")
+        onAllRefreshables { refreshAfterGameStart() }
+        startTurn()
+    }
 
+    private fun startTurn() {
+        val game = rootService.currentGame
+        checkNotNull(game)
+        onAllRefreshables {refreshAfterGameStart() }
     }
-    private fun startTurn(){
-        //TODO Implement turn switching logic for players, not sure if i should implement here
+
+    fun endTurn() {
+        val game = rootService.currentGame
+        checkNotNull(game)
+
+        //change player
+        val currentPlayer = game.players[(game.currentPlayerIndex+1 )% 2]
+
+        //TODO isVisible could be implemented here, for cards to be seen for each
+
+        onAllRefreshables { refreshAfterTurnEnds() }
+        startTurn()
     }
+
 
 
 

@@ -1,4 +1,4 @@
-package service
+package gui
 import entity.Card
 interface Refreshables {
 
