@@ -22,6 +22,7 @@ class CardTest{
         assertEquals(CardValue.ACE, aceOfDiamonds.value)
 
     }
+
     /**
      * Tests the properties of the [Card] instance by comparing [toString] representations
      */
@@ -38,6 +39,7 @@ class CardTest{
     fun testCardEqualityUsingToString(){
         assertEquals(aceOfDiamonds.toString(),otherAceOfDiamonds.toString())
     }
+
     /**
      * Tests the inequality of two [Card] by [toString] representations
      */

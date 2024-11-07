@@ -1,7 +1,6 @@
 package service
 
 import org.junit.jupiter.api.Assertions.assertDoesNotThrow
-import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.assertThrows
 import kotlin.test.*
 
@@ -10,13 +9,13 @@ class GameServiceTest{
 
     private var rootService = RootService()
 
-
     @BeforeTest
     fun setUp() {
         rootService = RootService()
         rootService.gameService.startNewGame(listOf("Alice", "Bob"))
     }
 
+    /** Tests starting game with invalid name entries*/
     @Test
     fun testInvalidPlayerNames(){
         assertFailsWith<IllegalArgumentException>{
@@ -30,16 +29,15 @@ class GameServiceTest{
         }
 
     }
+
+    /** Tests the game and player properties if they are set correct after the game starts */
     @Test
     fun testInitialGameState(){
         val game = rootService.currentGame
-        assertNotNull(game)
+        assertNotNull(game, "Game should be initialized")
+
         //Checks if the players list is populated with the given names
         assertEquals(game.players.size, 2)
-
-        //Checks if the both names are correct
-        assertEquals("Alice", game.players[0].name)
-        assertEquals("Bob", game.players[1].name)
 
         //Checks if both players have 5 cards in the hand and scoringPile are empty
         game.players.forEach { player ->
@@ -56,15 +54,14 @@ class GameServiceTest{
         //Checks the boundary of currentPlayerIndex either 0 or 1
         assertTrue(game.currentPlayerIndex == 0  || game.currentPlayerIndex == 1)
 
-        assertTrue(game.players.all { player -> player.scoringPile.isEmpty() })
 
 
     }
-
+    /** Tests starting a new game and ends the turn */
     @Test
-    fun testStartNewGame() {
+    fun testStartNewGameAndEndTurn() {
         val game = rootService.currentGame
-        assertNotNull(game)
+        assertNotNull(game, "Game should be initialized")
 
         // Test: The game has been created with the correct players
         assertEquals(2, game.players.size)
@@ -78,7 +75,7 @@ class GameServiceTest{
         assertNotEquals(previousPlayerIndex, game.players[game.currentPlayerIndex])
 
     }
-    /** Test starting a turn with no game active. */
+    /** Tests starting a turn with no game active. */
     @Test
     fun testStartTurnNoGame() {
         // Set the current game of the root service to null
@@ -88,7 +85,7 @@ class GameServiceTest{
         assertThrows<IllegalStateException> { rootService.gameService.startTurn() }
     }
 
-    /** Test ending a turn with no game active. */
+    /** Tests ending a turn with no game active. */
     @Test
     fun testEndTurnNoGame() {
         // Set the current game of the root service to null

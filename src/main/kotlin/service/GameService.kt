@@ -6,7 +6,7 @@ import kotlin.random.Random
 
 
 
-
+//TODO KDoc
 
 
 class GameService(private val rootService: RootService) : AbstractRefreshingService() {
@@ -70,6 +70,7 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
         onAllRefreshables { refreshAfterTurnEnds() }
         startTurn()
     }
+
     //Creates a not-shuffled standard deck (52 cards) by creating all values for each suit (clubs, spades, hearts,diamonds)
     private fun createStandardDeck(): Stack<Card> {
         val standardDeck = Stack<Card>()

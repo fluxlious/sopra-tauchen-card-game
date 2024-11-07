@@ -113,7 +113,7 @@ class PlayerActionService(private val rootService: RootService) {
         // Mark the swap as used
         currentPlayer.hasSwapped = true
     }
-    private fun discardCard(card: Card) {
+    fun discardCard(card: Card) {
         val game = rootService.currentGame
         checkNotNull(game)
         val currentPlayer = game.players[game.currentPlayerIndex]
