@@ -12,12 +12,14 @@ import java.util.*
  * @property drawPile the stack of cards where players can draw cards
  * @property middleCards the list of the cards in the middle, used to form trios or be swapped.
  * @property discardPile stores the discarded cards
+ * @property isGameOver checks if the game ended
  */
 class Tauchen(var currentPlayerIndex: Int = 0, val players : List<Player>) {
 
     val drawPile: Stack<Card> = Stack()
     val middleCards: MutableList<Card> = mutableListOf()
     val discardPile: Stack<Card> = Stack()
+    var isGameOver: Boolean = false
 
 
 

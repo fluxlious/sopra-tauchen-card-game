@@ -133,14 +133,7 @@ class PlayerActionServiceTest {
 
 
     }
-    @Test
-    fun testDrawCard(){
-        val game = rootService.currentGame
-        assertNotNull(game)
 
-        val currentPlayer = game.players[game.currentPlayerIndex]
-
-    }
     @Test
     fun testDiscardCardSuccessful(){
         val game = rootService.currentGame
@@ -172,7 +165,42 @@ class PlayerActionServiceTest {
         currentPlayer.hand.addAll(randomFiveCards)
         val discardedCard = Card(CardSuit.HEARTS, CardValue.TEN) //player doesn't have this card in the hand.
         assertThrows<IllegalArgumentException>(){rootService.playerActionService.discardCard(discardedCard) }
-}
     }
+   @Test
+   fun testDrawAndPlayCardOnTwoCardsMiddle(){
+       val game = rootService.currentGame
+       checkNotNull(game)
+       val currentPlayer = game.players[game.currentPlayerIndex]
+
+       //Setting the controlled setup
+       val middleCard = listOf(Card(CardSuit.SPADES, CardValue.TEN),
+           Card(CardSuit.SPADES, CardValue.THREE),)
+       game.middleCards.addAll(middleCard)
+       game.drawPile.push(Card(CardSuit.SPADES, CardValue.THREE))
+
+       rootService.playerActionService.drawCard()
+       //checks if the drawing action is successful
+       assertTrue(currentPlayer.hand.size == 6)
+       rootService.playerActionService.playCard(currentPlayer.hand.last())
+       assertTrue(game.middleCards.isEmpty() && currentPlayer.score == 5 )
+       assertTrue(currentPlayer.hasActionTaken)
+
+   }
+    @Test
+    fun testDrawCardPlayCardOnEmptyMiddle(){
+        val game = rootService.currentGame
+        checkNotNull(game)
+        val currentPlayer = game.players[game.currentPlayerIndex]
 
 
+        rootService.playerActionService.drawCard()
+        println(game.middleCards)
+        println(currentPlayer.hand)
+        rootService.playerActionService.playCard(currentPlayer.hand.last())
+
+        println("After draw and play")
+        println(game.middleCards)
+        println(currentPlayer.hand)
+
+    }
+}

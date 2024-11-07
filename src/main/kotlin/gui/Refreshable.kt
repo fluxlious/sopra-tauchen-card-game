@@ -2,16 +2,16 @@ package gui
 import entity.Card
 interface Refreshable {
 
-    fun refreshAfterGameStart(){}
+    fun refreshAfterStartNewGame(){}
 
 
     fun refreshAfterTurnStart(){}
 
 
-    fun refreshAfterTurnEnds(){}
+    fun refreshAfterTurnEnd(){}
 
 
-    fun refreshAfterCardPlayed(playedCard: Card){}
+    fun refreshAfterPlayCard(playedCard: Card){}
 
 
     fun refreshAfterDrawCard(drawnCard: Card){}

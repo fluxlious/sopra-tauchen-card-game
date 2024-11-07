@@ -14,25 +14,30 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
             throw IllegalArgumentException("The card should be in the players hand")
         }
 
+        if((isCardValid(card) && !currentPlayer.hasActionTaken) || (card == currentPlayer.lastDrawnCard) ){
+            //If the card is valid, play it to the middle
+            middleCards.add(card)
+            currentPlayer.hand.remove(card)
+            currentPlayer.hasActionTaken = true
 
-        // Check if the player wants to play the card that
-        if (card == currentPlayer.lastDrawnCard) {
-            //covers the exception that the player is trying to play the drawn card
-            if(currentPlayer.hasActionTaken && card == currentPlayer.lastDrawnCard) {
-
+            //Check trio formation if there are three cards in the middle after playing the card
+            if(middleCards.size == 3){
+                takeTrio()
             }
+            // Check if this is the last turn
+            if (game.isGameOver) {
+                println("Game is ending as the last card was drawn. Final scoring applied.")
+                rootService.gameService.endGame()  // Assume this method handles the end-game process
+            } else {
+                nextTurn()
+            }
+
+        }
+        else{
+            throw IllegalArgumentException("The card is not valid")
         }
 
-        //If the card is valid, play it to the middle
-        middleCards.add(card)
-        currentPlayer.hand.remove(card)
-        currentPlayer.hasActionTaken = true
 
-        //Check trio formation if there are three cards in the middle after playing the card
-        if(middleCards.size == 3){
-            takeTrio()
-        }
-        //nextTurn()
     }
 
     private fun takeTrio() {
@@ -61,7 +66,7 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
 
         val trio = middleCards.toList()
         currentPlayer.scoringPile.add(trio)
-        println("${currentPlayer.name} has ${trio.toString()}  in the scoring pile")
+        println("${currentPlayer.name} has scored ${trio.toString()}")
         middleCards.clear()
     }
 
@@ -83,6 +88,10 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
         currentPlayer.hand.add(drawnCard)
         currentPlayer.hasActionTaken = true
         currentPlayer.lastDrawnCard = drawnCard
+        // if the drawPile is empty after the draw, we set the game over but allow playing the
+        if(game.drawPile.isEmpty()){
+            game.isGameOver = true
+        }
 
         onAllRefreshables {
             refreshAfterDrawCard(drawnCard)
@@ -129,8 +138,11 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
         if(currentPlayer.hand.contains(card) && currentPlayer.hand.size > 8){
             currentPlayer.hand.remove(card)
             game.discardPile.push(card)
+            onAllRefreshables { refreshAfterDrawCard(card) }
         }
-
+        else{
+            throw IllegalArgumentException("You cant discard card")
+        }
 
     }
     fun isCardValid(card: Card): Boolean {
@@ -148,14 +160,16 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
         }
     }
 
-    internal fun nextTurn(){
+
+    fun nextTurn(){
         val game = rootService.currentGame
         checkNotNull(game)
         val currentPlayer = game.players[game.currentPlayerIndex]
         if(currentPlayer.hasActionTaken){
-            game.currentPlayerIndex = (game.currentPlayerIndex + 1) % game.players.size
 
-            println("Turn changes to ${game.players[game.currentPlayerIndex].name}")
+            currentPlayer.hasActionTaken == false
+            rootService.gameService.endTurn()
+
         }
         else{
             println("You should perform an action")

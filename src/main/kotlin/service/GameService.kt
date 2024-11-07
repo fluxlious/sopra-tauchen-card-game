@@ -46,7 +46,7 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
         game.currentPlayerIndex= Random.nextInt(players.size)
 
         rootService.currentGame = game
-        onAllRefreshables { refreshAfterGameStart() }
+        onAllRefreshables { refreshAfterStartNewGame() }
         startTurn()
     }
 
@@ -55,7 +55,7 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
         checkNotNull(game)
         println("${game.players[game.currentPlayerIndex].name} starts")
 
-        onAllRefreshables {refreshAfterGameStart() }
+        onAllRefreshables {refreshAfterTurnStart() }
     }
 
     fun endTurn() {
@@ -70,10 +70,15 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
 
         //TODO isVisible could be implemented here, for cards to be seen for each
 
-        onAllRefreshables { refreshAfterTurnEnds() }
+        onAllRefreshables { refreshAfterTurnEnd() }
         startTurn()
     }
+    fun endGame(){
+        val game = rootService.currentGame
+        checkNotNull(game)
 
+        onAllRefreshables { refreshAfterEndGame() }
+    }
     //Creates a not-shuffled standard deck (52 cards) by creating all values for each suit (clubs, spades, hearts,diamonds)
     private fun createStandardDeck(): Stack<Card> {
         val standardDeck = Stack<Card>()
