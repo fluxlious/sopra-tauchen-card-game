@@ -1,6 +1,7 @@
 package service
 
 import entity.*
+import org.junit.jupiter.api.assertThrows
 import kotlin.test.*
 
 class PlayerActionServiceTest {
@@ -18,12 +19,11 @@ class PlayerActionServiceTest {
 
 
 
-
+    //Tests playing a card that forms a value trio
     @Test
     fun testPlayCardWithValueTrio() {
         val game = rootService.currentGame
         assertNotNull(game)
-
         val currentPlayer = game.players[game.currentPlayerIndex]
 
         val middleCard = listOf(Card(CardSuit.HEARTS, CardValue.TEN),
@@ -32,12 +32,12 @@ class PlayerActionServiceTest {
         game.middleCards.addAll(middleCard)
         val compatibleCard = Card(CardSuit.CLUBS, CardValue.TEN)
 
-        currentPlayer.hand.clear()
+        currentPlayer.hand.clear() // Clear hand for controlled setup
         currentPlayer.hand.add(compatibleCard)
 
         println("Player has ${currentPlayer.hand} before trio ")
         println("Middle card has ${game.middleCards} before trio ")
-
+        rootService.playerActionService.playCard(compatibleCard)
         println("Player has ${currentPlayer.hand} post trio ")
 
         assertFalse(currentPlayer.hand.contains(compatibleCard), "The card should be removed from player's hand")
@@ -45,16 +45,16 @@ class PlayerActionServiceTest {
         assertEquals(20,currentPlayer.score)//post-trio score should be 20
         assertEquals(1, currentPlayer.scoringPile.size)//post-trio scoringPile should have one trio
     }
+    //Tests playing a card that forms a suit trio
     @Test
     fun testPlayCardWithSuitTrio() {
         val game = rootService.currentGame
         assertNotNull(game, "Game should be initialized")
-
         val currentPlayer = game.players[game.currentPlayerIndex]
 
-        // Create a middle card in the game
+
         val middleCard = listOf(Card(CardSuit.SPADES, CardValue.TEN),
-            Card(CardSuit.SPADES, CardValue.THREE),)
+                                Card(CardSuit.SPADES, CardValue.THREE),)
 
         game.middleCards.addAll(middleCard)
         val compatibleCard = Card(CardSuit.SPADES, CardValue.FOUR)
@@ -70,17 +70,15 @@ class PlayerActionServiceTest {
 
         assertFalse(currentPlayer.hand.contains(compatibleCard), "The card should be removed from player's hand")
         assertEquals(0, game.middleCards.size)
-        assertNotEquals(20,currentPlayer.score)
         assertEquals(5,currentPlayer.score)
-        println(currentPlayer.scoringPile)
         assertEquals(1, currentPlayer.scoringPile.size)
     }
+    //Tests playing a card that on an empty middle
     @Test
     fun testPlayCardOnEmptyMiddle() {
         val game = rootService.currentGame
         assertNotNull(game, "Game should be initialized")
         val currentPlayer = game.players[game.currentPlayerIndex]
-
 
 
         rootService.playerActionService.playCard(currentPlayer.hand.random())
@@ -119,10 +117,9 @@ class PlayerActionServiceTest {
     @Test
     fun testPlayCardWithFullMiddleCards() {
         val game = rootService.currentGame
-        assertNotNull(game, "Game should be initialized")
-
-
+        assertNotNull(game)
         val currentPlayer = game.players[game.currentPlayerIndex]
+
 
         // Set up middleCards to be full
         game.middleCards.addAll(listOf(
@@ -137,21 +134,45 @@ class PlayerActionServiceTest {
 
     }
     @Test
-    fun testDiscardCardSuccessful(){
-
+    fun testDrawCard(){
         val game = rootService.currentGame
-        assertNotNull(game, "Game should be initialized")
+        assertNotNull(game)
+
         val currentPlayer = game.players[game.currentPlayerIndex]
 
-        val randomFiveCards = mutableListOf(Card(CardSuit.HEARTS, CardValue.THREE),Card(CardSuit.SPADES, CardValue.TWO),Card(CardSuit.SPADES, CardValue.TEN),Card(CardSuit.SPADES, CardValue.NINE))
+    }
+    @Test
+    fun testDiscardCardSuccessful(){
+        val game = rootService.currentGame
+        assertNotNull(game)
+
+        val currentPlayer = game.players[game.currentPlayerIndex]
+
+        val randomFiveCards = mutableListOf(Card(CardSuit.HEARTS, CardValue.THREE),Card(CardSuit.SPADES, CardValue.TWO),
+                                            Card(CardSuit.SPADES, CardValue.TEN),Card(CardSuit.SPADES, CardValue.NINE))
+
         currentPlayer.hand.addAll(randomFiveCards)
-        println(currentPlayer.hand.toString())
         val discardedCard = Card(CardSuit.HEARTS, CardValue.THREE)
         rootService.playerActionService.discardCard(discardedCard)
-        println(currentPlayer.hand.toString())
         assertFalse(currentPlayer.hand.contains(discardedCard))
         assertTrue(game.discardPile.contains(discardedCard))
     }
+    @Test
+    fun testDiscardCardUnsuccessful(){
+        val game = rootService.currentGame
+        assertNotNull(game)
+
+        val currentPlayer = game.players[game.currentPlayerIndex]
+        currentPlayer.hand.clear() // Clear hand for controlled setup
+
+
+        val randomFiveCards = mutableListOf(Card(CardSuit.HEARTS, CardValue.THREE),Card(CardSuit.SPADES, CardValue.TWO),
+            Card(CardSuit.SPADES, CardValue.TEN),Card(CardSuit.SPADES, CardValue.NINE))
+
+        currentPlayer.hand.addAll(randomFiveCards)
+        val discardedCard = Card(CardSuit.HEARTS, CardValue.TEN) //player doesn't have this card in the hand.
+        assertThrows<IllegalArgumentException>(){rootService.playerActionService.discardCard(discardedCard) }
 }
+    }
 
 

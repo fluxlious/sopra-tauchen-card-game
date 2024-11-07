@@ -2,7 +2,7 @@ package service
 
 import entity.*
 
-class PlayerActionService(private val rootService: RootService) {
+class PlayerActionService(private val rootService: RootService) : AbstractRefreshingService() {
 
     fun playCard(card: Card){
         val game = rootService.currentGame
@@ -14,22 +14,16 @@ class PlayerActionService(private val rootService: RootService) {
             throw IllegalArgumentException("The card should be in the players hand")
         }
 
+
         // Check if the middle is playable
         if (middleCards.isNotEmpty() && middleCards.size < 3) {
-            //check if the card is valid play
-            val isValidPlay = middleCards.any { middleCard ->
-                middleCard.suit == card.suit || middleCard.value == card.value
-            }
 
-            if (!isValidPlay) {
-                throw IllegalArgumentException("Invalid play: Card must match either suit or value of a middle card")
-            }
         }
 
         //If the card is valid, play it to the middle
         middleCards.add(card)
         currentPlayer.hand.remove(card)
-        game.players[game.currentPlayerIndex].hasActionTaken = true
+        currentPlayer.hasActionTaken = true
 
         //Check trio formation if there are three cards in the middle after playing the card
         if(middleCards.size == 3){
@@ -72,17 +66,27 @@ class PlayerActionService(private val rootService: RootService) {
 
     internal fun drawCard(){
         val game = rootService.currentGame
-        // Check if the player has 8 cards or fewer in hand
         checkNotNull(game)
         val currentPlayer = game.players[game.currentPlayerIndex]
 
         if (currentPlayer.hand.size > 8) {
-            throw IllegalStateException("Cannot draw a card: Player already has more than 8 cards in hand.")
+            throw IllegalStateException("Player already has more than 8 cards in hand.")
         }
-        val drawnCard = game.drawPile.pop()
+        else if(game.drawPile.isEmpty()) {
+            throw IllegalStateException("Draw pile is empty")
+        }
+        val drawnCard = game.drawPile.pop() // draw the card from drawPile
 
+        currentPlayer.hand.add(drawnCard)
+        currentPlayer.hasActionTaken = true
+        currentPlayer.lastDrawnCard = drawnCard
 
+        onAllRefreshables {
+            refreshAfterDrawCard(drawnCard)
+            //TODO we can animate or put a indicator that gets the players attention
+        }
     }
+
     internal fun swapCard(toSwap: Card, middleCard: Card) {
         val game = rootService.currentGame
         checkNotNull(game) { "Game must be initialized to perform a swap." }
@@ -112,6 +116,7 @@ class PlayerActionService(private val rootService: RootService) {
 
         // Mark the swap as used
         currentPlayer.hasSwapped = true
+        currentPlayer.hasActionTaken = true
     }
     fun discardCard(card: Card) {
         val game = rootService.currentGame
@@ -122,12 +127,22 @@ class PlayerActionService(private val rootService: RootService) {
             currentPlayer.hand.remove(card)
             game.discardPile.push(card)
         }
-        else{
-            throw IllegalArgumentException("Player doesnt have the card ${card.toString()} in the hand")
-        }
+
 
     }
+    fun isCardValid(card: Card): Boolean {
+        val game = rootService.currentGame
+        checkNotNull(game)
+        val middleCards = game.middleCards
+        val currentPlayer = game.players[game.currentPlayerIndex]
 
+        //check if the card is valid play
+        return middleCards.any { middleCard ->
+            middleCard.suit == card.suit || middleCard.value == card.value
+        }
+
+
+    }
 
     internal fun nextTurn(){
         val game = rootService.currentGame

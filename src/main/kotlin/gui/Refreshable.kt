@@ -14,7 +14,7 @@ interface Refreshable {
     fun refreshAfterCardPlayed(playedCard: Card){}
 
 
-    fun refreshAfterCardDrawn(card: Card){}
+    fun refreshAfterDrawCard(drawnCard: Card){}
 
 
     fun refreshAfterCardSwap(trioCard: Card, handCard: Card){}

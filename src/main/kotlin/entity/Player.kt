@@ -13,6 +13,7 @@ import java.util.*
  * @property hasActionTaken indicates whether the player has taken any game actions in the current round
  * @property hand the mutable list of cards that the player holds currently
  * @property swapCard the card that the player takes from the middle during swap action
+ * @property lastDrawnCard tracks the card that is most recently drawn to allow player to play it after drawing action
  * @property scoringPile the list of trios that the player has formed
  */
 class Player (var name : String){
@@ -23,6 +24,7 @@ class Player (var name : String){
 
     val hand: MutableList<Card> = mutableListOf()
     var swapCard: Card? = null
+    var lastDrawnCard : Card? = null
 
     val scoringPile: MutableList<List<Card>> = mutableListOf()
 
