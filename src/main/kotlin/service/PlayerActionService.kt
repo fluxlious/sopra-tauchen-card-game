@@ -15,9 +15,12 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
         }
 
 
-        // Check if the middle is playable
-        if (middleCards.isNotEmpty() && middleCards.size < 3) {
+        // Check if the player wants to play the card that
+        if (card == currentPlayer.lastDrawnCard) {
+            //covers the exception that the player is trying to play the drawn card
+            if(currentPlayer.hasActionTaken && card == currentPlayer.lastDrawnCard) {
 
+            }
         }
 
         //If the card is valid, play it to the middle
@@ -132,25 +135,31 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
     }
     fun isCardValid(card: Card): Boolean {
         val game = rootService.currentGame
-        checkNotNull(game)
+        checkNotNull(game) { "No game is currently active." }
+        checkNotNull(card)
         val middleCards = game.middleCards
-        val currentPlayer = game.players[game.currentPlayerIndex]
 
-        //check if the card is valid play
+        // if the middle is empty, every card is valid
+        if (middleCards.isEmpty()) return true
+
+        // Check if the card matches any middle card by suit or value
         return middleCards.any { middleCard ->
             middleCard.suit == card.suit || middleCard.value == card.value
         }
-
-
     }
 
     internal fun nextTurn(){
         val game = rootService.currentGame
         checkNotNull(game)
         val currentPlayer = game.players[game.currentPlayerIndex]
+        if(currentPlayer.hasActionTaken){
+            game.currentPlayerIndex = (game.currentPlayerIndex + 1) % game.players.size
 
-        game.currentPlayerIndex = (game.currentPlayerIndex + 1) % game.players.size
+            println("Turn changes to ${game.players[game.currentPlayerIndex].name}")
+        }
+        else{
+            println("You should perform an action")
+        }
 
-        println("Turn changes to ${game.players[game.currentPlayerIndex].name}")
     }
 }

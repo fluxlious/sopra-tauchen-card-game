@@ -61,7 +61,10 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
     fun endTurn() {
         val game = rootService.currentGame
         checkNotNull(game)
-        println("${game.players[game.currentPlayerIndex].name} ends the his/her turn")
+        val currentPlayer = game.players[game.currentPlayerIndex]
+
+        println("${currentPlayer.name} ends the turn")
+
         //change player
         game.currentPlayerIndex = (game.currentPlayerIndex + 1) % 2
 
