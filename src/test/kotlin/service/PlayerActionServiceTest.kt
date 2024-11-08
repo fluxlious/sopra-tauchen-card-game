@@ -203,13 +203,7 @@ class PlayerActionServiceTest {
         println(currentPlayer.hand)
 
     }
-    @Test
-    fun drawLastCardAndPlayCard(){
-        val game = rootService.currentGame
-        checkNotNull(game)
-        val currentPlayer = game.players[game.currentPlayerIndex]
 
-    }
     @Test
     fun nextTurnWithOutActionTaken(){
         val game = rootService.currentGame
@@ -218,4 +212,6 @@ class PlayerActionServiceTest {
         assertThrows<IllegalStateException> { rootService.playerActionService.nextTurn() }
 
     }
+
+
 }

@@ -55,11 +55,9 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
         checkNotNull(game)
         println("${game.players[game.currentPlayerIndex].name} starts")
 
-<<<<<<< HEAD
-        onAllRefreshables {refreshAfterTurnStart() }
-=======
+
         onAllRefreshables {refreshAfterStartTurn() }
->>>>>>> 7e4e0de2376c8bc38c9de099a4b2d24cf4df7a14
+
     }
 
     fun endTurn() {

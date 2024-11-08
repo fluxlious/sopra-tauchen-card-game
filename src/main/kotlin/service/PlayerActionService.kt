@@ -172,7 +172,7 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
         }
 
     }
-    private fun isCardValid(card: Card): Boolean {
+    fun isCardValid(card: Card): Boolean {
         val game = rootService.currentGame
         checkNotNull(game) { "No game is currently active." }
         val middleCards = game.middleCards
