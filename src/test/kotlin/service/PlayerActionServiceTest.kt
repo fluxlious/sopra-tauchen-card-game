@@ -12,8 +12,8 @@ class PlayerActionServiceTest {
     @BeforeTest
     fun setUp() {
         rootService = RootService()
-//        testRefreshable = TestRefreshable(rootService)
-//        rootService.addRefreshable(testRefreshable)
+//    testRefreshable = TestRefreshable(rootService)
+//         rootService.addRefreshable(testRefreshable)
         rootService.gameService.startNewGame(listOf("Alice", "Bob" ))
     }
 
@@ -183,7 +183,7 @@ class PlayerActionServiceTest {
        assertTrue(currentPlayer.hand.size == 6)
        rootService.playerActionService.playCard(currentPlayer.hand.last())
        assertTrue(game.middleCards.isEmpty() && currentPlayer.score == 5 )
-       assertTrue(currentPlayer.hasActionTaken)
+
 
    }
     @Test
@@ -201,6 +201,21 @@ class PlayerActionServiceTest {
         println("After draw and play")
         println(game.middleCards)
         println(currentPlayer.hand)
+
+    }
+    @Test
+    fun drawLastCardAndPlayCard(){
+        val game = rootService.currentGame
+        checkNotNull(game)
+        val currentPlayer = game.players[game.currentPlayerIndex]
+
+    }
+    @Test
+    fun nextTurnWithOutActionTaken(){
+        val game = rootService.currentGame
+        checkNotNull(game)
+        val currentPlayer = game.players[game.currentPlayerIndex]
+        assertThrows<IllegalStateException> { rootService.playerActionService.nextTurn() }
 
     }
 }

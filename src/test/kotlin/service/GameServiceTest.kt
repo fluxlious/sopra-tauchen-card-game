@@ -94,4 +94,5 @@ class GameServiceTest{
         // Test: No game is currently active
         assertThrows<IllegalStateException> { rootService.gameService.endTurn() }
     }
+
 }
