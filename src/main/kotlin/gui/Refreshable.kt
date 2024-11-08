@@ -5,7 +5,7 @@ interface Refreshable {
     fun refreshAfterStartNewGame(){}
 
 
-    fun refreshAfterTurnStart(){}
+    fun refreshAfterStartTurn(){}
 
 
     fun refreshAfterTurnEnd(){}
