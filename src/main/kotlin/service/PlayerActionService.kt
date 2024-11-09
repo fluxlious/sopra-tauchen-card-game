@@ -4,6 +4,7 @@ import entity.*
 
 class PlayerActionService(private val rootService: RootService) : AbstractRefreshingService() {
 
+
     fun playCard(card: Card){
         val game = rootService.currentGame
         checkNotNull(game)
@@ -36,7 +37,6 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
             throw IllegalArgumentException("The card is not valid")
         }
 
-
     }
 
     private fun takeTrio() {
@@ -57,6 +57,7 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
         }
         addCardsToScoringPile(currentPlayer)
     }
+
     private fun addCardsToScoringPile(currentPlayer : Player) {
         val game = rootService.currentGame
         checkNotNull(game)
@@ -67,8 +68,6 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
         println("${currentPlayer.name} has scored ${trio.toString()}")
         middleCards.clear()
     }
-
-
 
     internal fun drawCard(){
         val game = rootService.currentGame
@@ -165,6 +164,7 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
 
 
     }
+
     private fun isSwapValid(cardFromHand: Card, cardFromMiddle: Card, middleCards : MutableList<Card>) : Boolean {
         //We take a copy of the middleCards not to manipulate the real middleCards in case the swap action is not valid
         val temporaryMiddleCards = middleCards.toMutableList()
@@ -205,7 +205,6 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
             middleCard.suit == card.suit || middleCard.value == card.value
         }
     }
-
 
     fun nextTurn(){
         val game = rootService.currentGame

@@ -1,6 +1,5 @@
 package entity
 
-import java.util.*
 
 /**
  * Entity to represent a player in the game "Tauchen"

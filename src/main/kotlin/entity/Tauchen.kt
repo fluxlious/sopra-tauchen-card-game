@@ -19,7 +19,7 @@ class Tauchen(var currentPlayerIndex: Int = 0, val players : List<Player>) {
     val drawPile: Stack<Card> = Stack()
     val middleCards: MutableList<Card> = mutableListOf()
     val discardPile: Stack<Card> = Stack()
-    var isGameOver: Boolean = false
+
 
 
 

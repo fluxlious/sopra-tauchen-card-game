@@ -6,9 +6,6 @@ import kotlin.random.Random
 
 
 
-//TODO KDoc
-
-
 class GameService(private val rootService: RootService) : AbstractRefreshingService() {
 
     //initialize the game object with an empty list of players
@@ -30,7 +27,7 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
 
         val players = listOf(Player(playerNames[0]), Player(playerNames[1]))
         //Initialise the game with initialised players
-        val game: Tauchen = Tauchen(0, players)
+        val game = Tauchen(0, players)
 
         //Shuffle the standardDeck and put the shuffled cards into drawPile
         game.drawPile.addAll(createStandardDeck().shuffled())
