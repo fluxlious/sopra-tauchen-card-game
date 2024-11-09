@@ -1,28 +1,51 @@
 package gui
 import entity.Card
-interface Refreshable {
 
+/**
+ * This interface allows service layer classes to communicate with the GUI
+ * by refreshing GUI component according to the certain changes in the game.
+ */
+interface Refreshable {
+    /** Refreshes the GUI after a new game has been started. */
     fun refreshAfterStartNewGame(){}
 
-
+    /** Refreshes the GUI after a new turn has been started. */
     fun refreshAfterStartTurn(){}
 
-
+    /** Refreshes the GUI after a turn has ended */
     fun refreshAfterTurnEnd(){}
 
-
+    /** Refreshes the GUI after a card has been played.
+     *
+     * @param playedCard the [Card] has been played
+     */
     fun refreshAfterPlayCard(playedCard: Card){}
 
-
+    /** Refreshes the GUI after a card has been played.
+     *
+     * @param drawnCard the [Card] has been drawn
+     */
     fun refreshAfterDrawCard(drawnCard: Card){}
 
+    /** Refreshes the GUI after a swap action has taken place
+     *
+     * @param cardFromHand the [Card] that is selected from the hand for swap action
+     * @param cardFromMiddle the [Card] that is selected from the middle for swap action
+     */
+    fun refreshAfterSwapCard(cardFromHand : Card, cardFromMiddle : Card){}
 
-    fun refreshAfterCardSwap(trioCard: Card, handCard: Card){}
+    /** Refreshes the GUI after a card has been drawn from drawStack
+     *
+     * @param discardedCard the [Card] has been discarded.
+     */
+    fun refreshAfterDiscardCard(discardedCard : Card){}
 
-
-    fun refreshAfterDiscardCard(handCard: Card){}
-
-
+    /** Refreshes the GUI after the game has ended */
     fun refreshAfterEndGame(){}
+
+    //TODO not yet implemented in the game logic, i will try to implement in the GUI
+    /** Refreshes the GUI after the game has been restarted. */
+    fun refreshAfterGameRestart() {}
+
 
 }

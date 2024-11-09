@@ -111,7 +111,9 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
         game.middleCards.add(lastDrawnCard)
         currentPlayer.hand.remove(lastDrawnCard)
         currentPlayer.lastDrawnCard = null
-
+        onAllRefreshables {
+            refreshAfterPlayCard(lastDrawnCard)
+        }
 
         // Check if the placement forms a trio and take it if valid
         if (game.middleCards.size == 3) {
@@ -155,7 +157,7 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
             // Mark the swap as used and action taken
             currentPlayer.hasSwapped = true
             currentPlayer.hasActionTaken = true
-            onAllRefreshables { refreshAfterCardSwap(cardFromHand, cardFromMiddle) }
+            onAllRefreshables { refreshAfterSwapCard(cardFromHand, cardFromMiddle) }
 
         }
         else{
