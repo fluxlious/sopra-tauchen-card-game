@@ -4,13 +4,13 @@ import entity.*
 import java.util.Stack
 import kotlin.random.Random
 
-
+//TODO add kdoc and enhance the inline comments
 
 class GameService(private val rootService: RootService) : AbstractRefreshingService() {
 
-    //initialize the game object with an empty list of players
+    //Initialize the game object with an empty list of players
     fun startNewGame(playerNames: List<String>) {
-        //initialize the game object with an empty list of players
+        //Initialize the game object with an empty list of players
         if (playerNames.size != 2) {
             throw IllegalArgumentException("Player list must have 2 players")
         }
@@ -20,7 +20,7 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
             throw IllegalArgumentException("Player names cannot be same")
         }
 
-        //checks if the player names are empty
+        //Checks if the player names are empty
         if(playerNames[0].isEmpty() || playerNames[1].isEmpty()) {
             throw IllegalArgumentException("Player names cannot be empty")
         }
@@ -38,7 +38,7 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
                 player.hand.add(game.drawPile.pop())
             }
         }
-        //start from random index between 0 and 1
+        //Start from random index between 0 and 1
         game.currentPlayerIndex= Random.nextInt(players.size)
 
         rootService.currentGame = game
@@ -70,12 +70,14 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
         onAllRefreshables { refreshAfterTurnEnd() }
         startTurn()
     }
+
     fun endGame(){
         val game = rootService.currentGame
         checkNotNull(game)
 
         onAllRefreshables { refreshAfterEndGame() }
     }
+
     //Creates a not-shuffled standard deck (52 cards) by creating all values for each suit (clubs, spades, hearts,diamonds)
     private fun createStandardDeck(): Stack<Card> {
         val standardDeck = Stack<Card>()
