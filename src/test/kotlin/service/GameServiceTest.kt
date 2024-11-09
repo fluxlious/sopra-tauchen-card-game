@@ -18,6 +18,8 @@ class GameServiceTest{
     /** Tests starting game with invalid name entries*/
     @Test
     fun testInvalidPlayerNames(){
+
+        //Checks the unaccepted name entries
         assertFailsWith<IllegalArgumentException>{
             rootService.gameService.startNewGame(listOf("Alice", "Bob", "Unwanted"))
         }
@@ -34,7 +36,7 @@ class GameServiceTest{
     @Test
     fun testInitialGameState(){
         val game = rootService.currentGame
-        assertNotNull(game, "Game should be initialized")
+        assertNotNull(game)
 
         //Checks if the players list is populated with the given names
         assertEquals(game.players.size, 2)
@@ -46,7 +48,6 @@ class GameServiceTest{
             println(player.hand)
         }
 
-        println(game.drawPile)
 
         //Checks if the drawPile has 42 cards after the cards are dealt
         assertEquals(42, game.drawPile.size)
@@ -61,15 +62,14 @@ class GameServiceTest{
     @Test
     fun testStartNewGameAndEndTurn() {
         val game = rootService.currentGame
-        assertNotNull(game, "Game should be initialized")
+        assertNotNull(game)
 
-        // Test: The game has been created with the correct players
         assertEquals(2, game.players.size)
         assertEquals("Alice", game.players[0].name)
         assertEquals("Bob", game.players[1].name)
 
         val previousPlayerIndex = game.players[game.currentPlayerIndex]
-        // Test: Calling endTurn will also call startTurn
+
         assertDoesNotThrow { rootService.gameService.endTurn() }
 
         assertNotEquals(previousPlayerIndex, game.players[game.currentPlayerIndex])
@@ -78,20 +78,16 @@ class GameServiceTest{
     /** Tests starting a turn with no game active. */
     @Test
     fun testStartTurnNoGame() {
-        // Set the current game of the root service to null
         rootService.currentGame = null
 
-        // Test: No game is currently active
         assertThrows<IllegalStateException> { rootService.gameService.startTurn() }
     }
 
     /** Tests ending a turn with no game active. */
     @Test
     fun testEndTurnNoGame() {
-        // Set the current game of the root service to null
         rootService.currentGame = null
 
-        // Test: No game is currently active
         assertThrows<IllegalStateException> { rootService.gameService.endTurn() }
     }
 

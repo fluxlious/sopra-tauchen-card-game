@@ -12,8 +12,8 @@ class PlayerActionServiceTest {
     @BeforeTest
     fun setUp() {
         rootService = RootService()
-//    testRefreshable = TestRefreshable(rootService)
-//         rootService.addRefreshable(testRefreshable)
+        //testRefreshable = TestRefreshable(rootService)
+        //rootService.addRefreshable(testRefreshable)
         rootService.gameService.startNewGame(listOf("Alice", "Bob" ))
     }
 
@@ -87,6 +87,7 @@ class PlayerActionServiceTest {
         assertEquals(1, game.middleCards.size)
         assertEquals(4,currentPlayer.hand.size)
         assertEquals(0,currentPlayer.score)
+
     }
     @Test
     fun testIllegalPlay() {
@@ -205,13 +206,54 @@ class PlayerActionServiceTest {
     }
 
     @Test
-    fun nextTurnWithOutActionTaken(){
+    fun testNextTurnWithOutActionTaken(){
         val game = rootService.currentGame
         checkNotNull(game)
         val currentPlayer = game.players[game.currentPlayerIndex]
         assertThrows<IllegalStateException> { rootService.playerActionService.nextTurn() }
 
     }
+    @Test
+    fun testSwapCardSuccessful(){
+        val game = rootService.currentGame
+        checkNotNull(game)
+        val currentPlayer = game.players[game.currentPlayerIndex]
+
+        currentPlayer.hand.clear()
+        val controlledMiddleCard = listOf(Card(CardSuit.HEARTS, CardValue.SEVEN),
+                                Card(CardSuit.SPADES, CardValue.SEVEN),)
+
+        game.middleCards.addAll(controlledMiddleCard)
+        currentPlayer.hand.add(Card(CardSuit.HEARTS, CardValue.TEN))
+        // Before Swap Hand: [♥10], Middle: [♥7, ♠7]
+        rootService.playerActionService.swapCard(currentPlayer.hand.last(), game.middleCards[1])
+
+        // After Swap Hand: [♠7], Middle: [♥7, ♥10]
+        //After swap action, check if both cards on the right place
+        assertTrue(currentPlayer.hand.contains(Card(CardSuit.SPADES, CardValue.SEVEN)))
+        assertTrue(game.middleCards.contains(Card(CardSuit.HEARTS, CardValue.TEN)))
+        assertTrue(currentPlayer.hasActionTaken && currentPlayer.hasSwapped)
+    }
+    @Test
+    fun testSwapCardUnsuccessful(){
+        val game = rootService.currentGame
+        checkNotNull(game)
+        val currentPlayer = game.players[game.currentPlayerIndex]
+
+        currentPlayer.hand.clear()
+        val controlledMiddleCard = listOf(Card(CardSuit.DIAMONDS, CardValue.EIGHT),
+            Card(CardSuit.SPADES, CardValue.EIGHT),)
+
+        game.middleCards.addAll(controlledMiddleCard)
+        currentPlayer.hand.add(Card(CardSuit.HEARTS, CardValue.TEN))
+
+
+        assertThrows<IllegalArgumentException> { rootService.playerActionService.swapCard(currentPlayer.hand.last(), game.middleCards[1])}
+
+        assertFalse(currentPlayer.hasActionTaken && currentPlayer.hasSwapped)
+    }
+
+
 
 
 }

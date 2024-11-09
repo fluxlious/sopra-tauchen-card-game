@@ -28,9 +28,7 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
             throw IllegalArgumentException("Player names cannot be empty")
         }
 
-        //Initialise the Player objects and populate the list
         val players = listOf(Player(playerNames[0]), Player(playerNames[1]))
-
         //Initialise the game with initialised players
         val game: Tauchen = Tauchen(0, players)
 
@@ -43,6 +41,7 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
                 player.hand.add(game.drawPile.pop())
             }
         }
+        //start from random index between 0 and 1
         game.currentPlayerIndex= Random.nextInt(players.size)
 
         rootService.currentGame = game
@@ -70,7 +69,6 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
         //change player
         game.currentPlayerIndex = (game.currentPlayerIndex + 1) % 2
 
-        //TODO isVisible could be implemented here, for cards to be seen for each
 
         onAllRefreshables { refreshAfterTurnEnd() }
         startTurn()

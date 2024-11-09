@@ -45,7 +45,6 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
 
         val currentPlayer = game.players[game.currentPlayerIndex]  // Access currentPlayer within method
         val middleCards = game.middleCards                          // Access middleCards within method
-        val isSuitTrio = middleCards.all({ it.suit == middleCards.first().suit  })
         val isValueTrio = middleCards.all({ it.value == middleCards.first().value})
         //They form value trio
         if(isValueTrio){
@@ -88,7 +87,7 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
         currentPlayer.hasActionTaken = true
         currentPlayer.lastDrawnCard = drawnCard
         onAllRefreshables { refreshAfterDrawCard(drawnCard) }
-        // if the drawPile is empty after the draw, we set the game over but allow playing the
+        // if the drawPile is empty after the draw, we set the game over but allow playing the card
         if(game.drawPile.isEmpty()){
             playLastCard()
         }
@@ -123,65 +122,86 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
         }
     }
 
-    internal fun swapCard(toSwap: Card, middleCard: Card) {
+    internal fun swapCard(cardFromHand: Card, cardFromMiddle: Card) {
         val game = rootService.currentGame
         checkNotNull(game) { }
 
         val currentPlayer = game.players[game.currentPlayerIndex]
         val middleCards = game.middleCards
 
-        // Ensure the player hasn't swapped this round
         if (currentPlayer.hasSwapped) {
             throw IllegalStateException("You have already swapped this round.")
         }
 
         if(middleCards.isEmpty()){
             throw IllegalStateException("The middle is empty")
-            }
+        }
 
         if (currentPlayer.hasActionTaken) {
             throw IllegalStateException("You have already taken an action this turn.")
         }
+
         // Ensure the selected cards are in the correct locations
-        if (!currentPlayer.hand.contains(toSwap) || !middleCards.contains(middleCard)) {
+        if (!currentPlayer.hand.contains(cardFromHand) || !middleCards.contains(cardFromMiddle)) {
             throw IllegalArgumentException("The selected cards for swap are not in the correct locations.")
         }
 
 
-        currentPlayer.hand.remove(toSwap)
-        currentPlayer.hand.add(middleCard)
-        middleCards.remove(middleCard)
-        middleCards.add(toSwap)
+        if(isSwapValid(cardFromHand, cardFromMiddle, middleCards)) {
+            currentPlayer.hand.remove(cardFromHand)
+            currentPlayer.hand.add(cardFromMiddle)
+            middleCards.remove(cardFromMiddle)
+            middleCards.add(cardFromHand)
 
-        // Mark the swap as used
-        currentPlayer.hasSwapped = true
-        currentPlayer.hasActionTaken = true
+            // Mark the swap as used and action taken
+            currentPlayer.hasSwapped = true
+            currentPlayer.hasActionTaken = true
+            onAllRefreshables { refreshAfterCardSwap(cardFromHand, cardFromMiddle) }
+
+        }
+        else{
+            throw IllegalArgumentException("The card is not valid")
+        }
+
+
     }
+    private fun isSwapValid(cardFromHand: Card, cardFromMiddle: Card, middleCards : MutableList<Card>) : Boolean {
+        //We take a copy of the middleCards not to manipulate the real middleCards in case the swap action is not valid
+        val temporaryMiddleCards = middleCards.toMutableList()
+        temporaryMiddleCards.add(cardFromHand)
+        temporaryMiddleCards.remove(cardFromMiddle)
+
+        // Check if all cards in the simulated middle have the same suit or value
+        return temporaryMiddleCards.all { it.suit == cardFromHand.suit } ||
+                temporaryMiddleCards.all { it.value == cardFromHand.value }
+
+
+    }
+
     fun discardCard(card: Card) {
         val game = rootService.currentGame
         checkNotNull(game)
         val currentPlayer = game.players[game.currentPlayerIndex]
 
-        if(currentPlayer.hand.contains(card) && currentPlayer.hand.size > 8){
-            currentPlayer.hand.remove(card)
-            game.discardPile.push(card)
-            onAllRefreshables { refreshAfterDiscardCard(card) }
-        }
-        else{
-            throw IllegalArgumentException("You cant discard card")
+        if(!currentPlayer.hand.contains(card)){
+
+            throw IllegalArgumentException("The card is not in the hand")
         }
 
+        currentPlayer.hand.remove(card)
+        game.discardPile.push(card)
+        onAllRefreshables { refreshAfterDiscardCard(card) }
+
+
     }
+
     fun isCardValid(card: Card): Boolean {
         val game = rootService.currentGame
         checkNotNull(game) { "No game is currently active." }
         val middleCards = game.middleCards
 
-        // if the middle is empty, every card is valid
-        if (middleCards.isEmpty()) return true
 
-        // Check if the card matches any middle card by suit or value
-        return middleCards.any { middleCard ->
+        return middleCards.all { middleCard ->
             middleCard.suit == card.suit || middleCard.value == card.value
         }
     }
@@ -196,6 +216,13 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
             currentPlayer.hasActionTaken = false
             currentPlayer.hasSwapped = false
             currentPlayer.lastDrawnCard = null
+
+            if(currentPlayer.hand.size > 8){
+                discardCard(currentPlayer.hand.last())
+                //Normally discard card will come from gui, so currentPlayer.hand.last() is just a placeholder default.
+                //It will be changed when we add a GUI that asks for the player to choose a card to discard before ending his/her turn
+            }
+
             rootService.gameService.endTurn()
 
         }
