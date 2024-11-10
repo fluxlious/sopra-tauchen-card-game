@@ -193,6 +193,7 @@ class PlayerActionServiceTest {
        assertTrue(game.middleCards.isEmpty() && currentPlayer.score == 5 && currentPlayer.scoringPile.isNotEmpty())
 
    }
+    /** Tests drawing a card, playing the another card that forms trio normally */
     @Test
     fun testDrawAndTryPlayAnotherCard(){
         val game = rootService.currentGame

@@ -75,8 +75,9 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
         val currentPlayer = game.players[game.currentPlayerIndex]
         val middleCards = game.middleCards
 
-        //stores a boolean that indicates that they form a value trio by comparing the first card of the middle with each card in the middle
-        val isValueTrio = middleCards.all({ it.value == middleCards.first().value})
+        //stores a boolean that indicates that they form a value trio
+        // by comparing the first card of the middle with each card in the middle
+        val isValueTrio = middleCards.all { it.value == middleCards.first().value }
 
 
         if(isValueTrio){//if the middle forms a value trio
@@ -135,7 +136,7 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
      * if the last drawn card is valid, plays the card on middle, checks the trio formation similar to playCard()
      * and ends the game.
      *
-     * This function gets trigger only when the [drawPile] becomes empty as it allows the player to play their last drawn card.
+     * This function gets trigger only when the drawPile becomes empty as it allows the player to play their last drawn card.
      *
      * @throws IllegalStateException if no game is active
      */
@@ -260,7 +261,8 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
     }
 
     /**
-     * Removes the given card from the current players' hand and adds it to discardPile. Used when the player got >8 cards in the hand.
+     * Removes the given card from the current players' hand and adds it to discardPile.
+     * Used when the player got >8 cards in the hand.
      * refreshes the GUI after the discard action takes place in game logic
      *
      * @param card the card that the player wants to discard
@@ -297,13 +299,15 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
 
         //Checks if the given [card] matches all middle cards either by suit or value.
 
-        return middleCards.all { middleCard -> //If the middle is empty and no cards to compare, all returns true, allowing any card to be played.
-            middleCard.suit == card.suit || middleCard.value == card.value
+        return middleCards.all { middleCard -> //If the middle is empty and there is no cards to compare,
+            middleCard.suit == card.suit || middleCard.value == card.value // all returns true, allowing any card to be played.
+
         }
     }
 
     /**
-     *  Advances the game to the next turn, resetting the current player's action trackers(hasSwapped, hasActionTaken and lastDrawnCard)
+     *  Advances the game to the next turn,
+     *  resetting the current player's action trackers(hasSwapped, hasActionTaken and lastDrawnCard)
      *  if currentPlayer has more than 8 cards, it prompts the player to discard a card before advancing to the next player
      *  if currentPlayer has less than 8 cards, it ends the turn by GameService.endTurn
      *
@@ -324,7 +328,8 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
                 onAllRefreshables { refreshAfterDiscardPrompt(currentPlayer) }
                 discardCard(currentPlayer.hand.last())
                 //Normally discard card will come from gui, so currentPlayer.hand.last() is just a placeholder default.
-                //It will be changed when we add a GUI that asks for the player to choose a card to discard before ending his/her turn
+                //It will be changed when we add a GUI that asks for the player
+                //to choose a card to discard before ending his/her turn
             }
 
             rootService.gameService.endTurn()

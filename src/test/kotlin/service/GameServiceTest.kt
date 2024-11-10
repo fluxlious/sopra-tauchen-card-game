@@ -9,7 +9,10 @@ import kotlin.test.*
  */
 class GameServiceTest{
     private var rootService = RootService()
-
+    /**
+     * Sets up a new game before each test
+     * Starts a new game before each test with two players (Alice,Bob)
+     */
 
     @BeforeTest
     fun setUp() {
