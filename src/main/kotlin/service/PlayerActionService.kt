@@ -2,8 +2,30 @@ package service
 
 import entity.*
 
+/**
+ * This service provides functionality/logic related to player actions, such as playing a card,
+ * drawing a card, swapping cards from middle and some helper functions to help these actions functionalities.
+ *
+ * @param rootService The root service that this service connects to
+ */
+
 class PlayerActionService(private val rootService: RootService) : AbstractRefreshingService() {
 
+    /**
+     *  Plays the given card from the current player's hand by removing from the hand and adding to the middle
+     *  if the card is valid play.A valid play means that the selected card matches the middle cards by either value or suit.
+     *
+     *  After a card is played, the player’s action is marked as taken, this prevents additional actions in the same turn.
+     *  If the play results in three cards in the middle, the trio is collected by the player, and points are awarded.
+     *  In this case, the swap ability (`hasSwapped`) is reset for both players to allow one swap in the next round.
+     *
+     * Additionally, if the player has just drawn a card, they are allowed to play that specific card in the same turn.
+     *
+     *  @param card The card to be played
+     *  @throws IllegalStateException if no game is active
+     *  @throws IllegalStateException if no game is currently active
+     *  @throws IllegalArgumentException if the card is not valid checked by [isCardValid]
+     */
 
     fun playCard(card: Card){
         val game = rootService.currentGame
@@ -15,61 +37,73 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
             throw IllegalArgumentException("The card should be in the players hand")
         }
 
-        if((isCardValid(card) && !currentPlayer.hasActionTaken) || (card == currentPlayer.lastDrawnCard) ){
-            //If the card is valid, play it to the middle
-            middleCards.add(card)
-            currentPlayer.hand.remove(card)
-            currentPlayer.hasActionTaken = true
-            onAllRefreshables {
-                refreshAfterPlayCard(card)
-            }
-
-            //Check trio formation if there are three cards in the middle after playing the card
-            if(middleCards.size == 3){
-                takeTrio()
-                // Reset swap ability for both players
-                game.players.forEach { it.hasSwapped = false }
-            }
-            nextTurn()
-
+        if (!isCardValid(card)) {
+            throw IllegalArgumentException("The card is not valid and cannot be played.")
         }
-        else{
-            throw IllegalArgumentException("The card is not valid")
+
+        // Check if the card is a normal play or the last drawn card
+        if (card != currentPlayer.lastDrawnCard && currentPlayer.hasActionTaken) {
+            throw IllegalStateException("You can only play the last drawn card in the same turn.")
         }
+        middleCards.add(card)
+        currentPlayer.hand.remove(card)
+        currentPlayer.hasActionTaken = true
+        onAllRefreshables { refreshAfterPlayCard(card) }
+
+        // Check trio formation if there are three cards in the middle after playing the card
+        if (middleCards.size == 3) {
+            takeTrioAndAddToScoringPile()
+            // Reset swap ability for both players
+            game.players.forEach { it.hasSwapped = false }
+        }
+
+        nextTurn()
 
     }
 
-    private fun takeTrio() {
+    /**
+     * a helper function for playCard that determines the type of trio (suit/value)
+     * and takes the trio from middleCards and adds to current players' scoringPile as a list
+     * also updates the score corresponding to the trio type that has been formed.
+     *
+     * @throws IllegalStateException if no game is active
+     */
+    private fun takeTrioAndAddToScoringPile() {
         val game = rootService.currentGame
         checkNotNull(game)
 
-        val currentPlayer = game.players[game.currentPlayerIndex]  // Access currentPlayer within method
-        val middleCards = game.middleCards                          // Access middleCards within method
+        val currentPlayer = game.players[game.currentPlayerIndex]
+        val middleCards = game.middleCards
+
+        //stores a boolean that indicates that they form a value trio by comparing the first card of the middle with each card in the middle
         val isValueTrio = middleCards.all({ it.value == middleCards.first().value})
-        //They form value trio
-        if(isValueTrio){
+
+
+        if(isValueTrio){//if the middle forms a value trio
             currentPlayer.score += 20
 
         }
-        //They form suit trio
-        else{
+
+        else{ // if the middle forms a suit trio
             currentPlayer.score += 5
         }
-        addCardsToScoringPile(currentPlayer)
-    }
-
-    private fun addCardsToScoringPile(currentPlayer : Player) {
-        val game = rootService.currentGame
-        checkNotNull(game)
-        val middleCards = game.middleCards
-
+        //scoringPile stores list of cards so the trio is converted into a list.
         val trio = middleCards.toList()
         currentPlayer.scoringPile.add(trio)
-        println("${currentPlayer.name} has scored ${trio.toString()}")
+        //println("${currentPlayer.name} has scored ${trio.toString()}")
         middleCards.clear()
     }
 
-    internal fun drawCard(){
+    /**
+     *
+     * Removes a card from the drawPile and adds it to the current players' hand
+     * if after drawing the card, drawPile is empty, triggers [playLastCard]
+     *
+     * @throws IllegalStateException if no game is active
+     * @throws IllegalStateException if the current players' hand is more than 8 cards.
+     * @throws IllegalStateException if the drawPile is empty
+     */
+    fun drawCard(){
         val game = rootService.currentGame
         checkNotNull(game)
         val currentPlayer = game.players[game.currentPlayerIndex]
@@ -77,8 +111,11 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
         if (currentPlayer.hand.size > 8) {
             throw IllegalStateException("Player already has more than 8 cards in hand.")
         }
-        else if(game.drawPile.isEmpty()) {
+        if(game.drawPile.isEmpty()) {
             throw IllegalStateException("Draw pile is empty")
+        }
+        if(currentPlayer.hasActionTaken){
+            throw IllegalStateException("Action taken")
         }
         val drawnCard = game.drawPile.pop() // draw the card from drawPile
 
@@ -93,7 +130,16 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
 
     }
 
-    fun playLastCard() {
+    /** Special function of the play card, allows player to play the last drawn card after drawing the last card.
+     * if the last drawn card is not valid, it is checked by [isCardValid]
+     * if the last drawn card is valid, plays the card on middle, checks the trio formation similar to playCard()
+     * and ends the game.
+     *
+     * This function gets trigger only when the [drawPile] becomes empty as it allows the player to play their last drawn card.
+     *
+     * @throws IllegalStateException if no game is active
+     */
+    private fun playLastCard() {
         val game = rootService.currentGame
         checkNotNull(game)
         val currentPlayer = game.players[game.currentPlayerIndex]
@@ -117,13 +163,30 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
 
         // Check if the placement forms a trio and take it if valid
         if (game.middleCards.size == 3) {
-            takeTrio()
-            rootService.gameService.endGame()
+            takeTrioAndAddToScoringPile()
+
 
         }
+        rootService.gameService.endGame()
     }
-
-    internal fun swapCard(cardFromHand: Card, cardFromMiddle: Card) {
+   /** Swaps a card from the current player's hand with a card from the middle if the swap is valid.
+    * The swap is allowed if the player has not already swapped or taken an action in the current turn.
+    *
+    * After the swapping is successful, the corresponding booleans are marked. (hasActionTaken, hasSwapped)
+    * and the GUI is refreshed.
+    *
+    * @param cardFromHand the selected card from the players' hand to be swapped with cardFromMiddle.
+    * @param cardFromMiddle the selected card in the middle to be swapped with cardFromHand
+    *
+    * @throws IllegalStateException if no game is active
+    * @throws IllegalStateException if the player has already swapped
+    * @throws IllegalStateException if the there is no card in the middle
+    * @throws IllegalStateException if the player has already taken an action
+    * @throws IllegalArgumentException if the selected card from hand is not in the hand
+    * or the selected card in the middle is not in middle
+    * @throws IllegalArgumentException if the swap is not valid, checked by isSwapValid()
+    */
+    fun swapCard(cardFromHand: Card, cardFromMiddle: Card) {
         val game = rootService.currentGame
         checkNotNull(game) { }
 
@@ -167,6 +230,22 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
 
     }
 
+    /**
+     * a helper function of swapCard that checks
+     * if swapping a card from the player's hand with a card from the middle
+     * maintains valid trio potential in the middle.
+     *
+     * The swap is considered valid if, after performing the swap, all cards in the middle
+     * either share the same suit or the same value. Not to manipulate the actual middle cards,
+     * the swapping and trio check is made on the copy of the middle cards.
+     *
+     * @throws IllegalStateException if no game is active
+     * @param cardFromHand the card from the players' hand to be swapped with cardFromMiddle.
+     * @param cardFromMiddle the card in the middle to be swapped with cardFromHand
+     * @param middleCards the list of current middle cards
+     *
+     * @return true if the temporary swap maintains potential trio by matching value or suit.
+     */
     private fun isSwapValid(cardFromHand: Card, cardFromMiddle: Card, middleCards : MutableList<Card>) : Boolean {
         //We take a copy of the middleCards not to manipulate the real middleCards in case the swap action is not valid
         val temporaryMiddleCards = middleCards.toMutableList()
@@ -180,6 +259,15 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
 
     }
 
+    /**
+     * Removes the given card from the current players' hand and adds it to discardPile. Used when the player got >8 cards in the hand.
+     * refreshes the GUI after the discard action takes place in game logic
+     *
+     * @param card the card that the player wants to discard
+     *
+     * @throws IllegalStateException if no game is active
+     * @throws IllegalStateException if the given card is not in current players' hand
+     */
     fun discardCard(card: Card) {
         val game = rootService.currentGame
         checkNotNull(game)
@@ -193,21 +281,35 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
         currentPlayer.hand.remove(card)
         game.discardPile.push(card)
         onAllRefreshables { refreshAfterDiscardCard(card) }
-
-
     }
 
-    fun isCardValid(card: Card): Boolean {
+    /**
+     * Checks if the given card can be played based on the current middle
+     *
+     * @param card The card to be checked
+     * @return true if the [card] can be legally played if it matches the middle cards either by suit or value
+     * @throws IllegalStateException if no game is currently active
+     */
+    private fun isCardValid(card: Card): Boolean {
         val game = rootService.currentGame
-        checkNotNull(game) { "No game is currently active." }
+        checkNotNull(game)
         val middleCards = game.middleCards
 
+        //Checks if the given [card] matches all middle cards either by suit or value.
 
-        return middleCards.all { middleCard ->
+        return middleCards.all { middleCard -> //If the middle is empty and no cards to compare, all returns true, allowing any card to be played.
             middleCard.suit == card.suit || middleCard.value == card.value
         }
     }
 
+    /**
+     *  Advances the game to the next turn, resetting the current player's action trackers(hasSwapped, hasActionTaken and lastDrawnCard)
+     *  if currentPlayer has more than 8 cards, it prompts the player to discard a card before advancing to the next player
+     *  if currentPlayer has less than 8 cards, it ends the turn by GameService.endTurn
+     *
+     *  @throws IllegalStateException if no game is active
+     *  @throws IllegalStateException if the player didn't take any action in the current round
+     */
     fun nextTurn(){
         val game = rootService.currentGame
         checkNotNull(game)
@@ -219,6 +321,7 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
             currentPlayer.lastDrawnCard = null
 
             if(currentPlayer.hand.size > 8){
+                onAllRefreshables { refreshAfterDiscardPrompt(currentPlayer) }
                 discardCard(currentPlayer.hand.last())
                 //Normally discard card will come from gui, so currentPlayer.hand.last() is just a placeholder default.
                 //It will be changed when we add a GUI that asks for the player to choose a card to discard before ending his/her turn

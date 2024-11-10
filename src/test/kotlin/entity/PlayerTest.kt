@@ -17,7 +17,6 @@ class PlayerTest{
         assertEquals(0, testPlayer.score)
         assertEquals(false, testPlayer.hasSwapped)
         //assertEquals(false,testPlayer.hasActionTaken)
-        assertEquals(null, testPlayer.swapCard)
         assertTrue(testPlayer.hand.isEmpty())
         assertTrue(testPlayer.scoringPile.isEmpty())
 

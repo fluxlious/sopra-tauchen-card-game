@@ -147,6 +147,28 @@ class PlayerActionServiceTest {
         val discardedCard = Card(CardSuit.HEARTS, CardValue.TEN) //player doesn't have this card in the hand.
         assertThrows<IllegalArgumentException>{ rootService.playerActionService.discardCard(discardedCard) }
     }
+    /** Tests the scenario that if the player has 9 cards before the turn ends */
+    @Test
+    fun testNextTurn9CardsInHand(){
+        val game = rootService.currentGame
+        assertNotNull(game)
+
+        val currentPlayer = game.players[game.currentPlayerIndex]
+
+        val randomFourCards = mutableListOf(Card(CardSuit.HEARTS, CardValue.THREE),Card(CardSuit.SPADES, CardValue.TWO),
+            Card(CardSuit.SPADES, CardValue.TEN),Card(CardSuit.SPADES, CardValue.NINE))
+        currentPlayer.hasActionTaken = true
+
+        currentPlayer.hand.addAll(randomFourCards)
+        rootService.playerActionService.nextTurn()
+
+        //Check if the player has 8 card after the forced discard.
+        assertEquals(8, currentPlayer.hand.size)
+
+        //Checks discarded goes into discardPile
+        assertTrue(game.discardPile.contains(Card(CardSuit.SPADES, CardValue.NINE)))
+    }
+
     /** Tests drawing a card, playing the drawn card and forming a trio*/
    @Test
    fun testDrawAndPlayCardOnTwoCardsMiddle(){
@@ -161,22 +183,50 @@ class PlayerActionServiceTest {
        game.drawPile.push(Card(CardSuit.SPADES, CardValue.THREE))
 
        rootService.playerActionService.drawCard()
-       //Checks the post-drawCard state
+
+       //Checks if the player has 6 cards after drawing
        assertTrue(currentPlayer.hand.size == 6)
 
        rootService.playerActionService.playCard(currentPlayer.hand.last())
 
-        //Checks the post trio-formation
-       assertTrue(game.middleCards.isEmpty() && currentPlayer.score == 5 )
-
+        //Checks there are no cards in the middle, score is set and scoringPile has the trio.
+       assertTrue(game.middleCards.isEmpty() && currentPlayer.score == 5 && currentPlayer.scoringPile.isNotEmpty())
 
    }
+    @Test
+    fun testDrawAndTryPlayAnotherCard(){
+        val game = rootService.currentGame
+        checkNotNull(game)
+        val currentPlayer = game.players[game.currentPlayerIndex]
+
+        //Setting the controlled setup
+        currentPlayer.hand.clear()
+        val middleCard = listOf(Card(CardSuit.SPADES, CardValue.TEN),
+            Card(CardSuit.SPADES, CardValue.THREE),)
+        currentPlayer.hand.add(Card(CardSuit.SPADES, CardValue.TWO))
+        game.middleCards.addAll(middleCard)
+        game.drawPile.push(Card(CardSuit.DIAMONDS, CardValue.THREE))
+
+        rootService.playerActionService.drawCard()
+        //cannot draw again
+        assertThrows<IllegalStateException> {rootService.playerActionService.drawCard()}
+
+        //Checks if the player has 6 cards after drawing
+        assertTrue(currentPlayer.hand.size == 2)
+        assertTrue(currentPlayer.hand.contains(Card(CardSuit.DIAMONDS, CardValue.THREE) ))
+
+        //the player tries to play another card in the hand that forms normally trio but not the drawn card
+        assertThrows<IllegalStateException> {rootService.playerActionService.playCard(Card(CardSuit.SPADES, CardValue.TWO))  }
+
+
+    }
     /** Tests changing the turn without taking any action*/
     @Test
     fun testNextTurnWithOutActionTaken(){
         val game = rootService.currentGame
         checkNotNull(game)
 
+        //Test allowing to proceed into next Turn without any action taken.
         assertThrows<IllegalStateException> { rootService.playerActionService.nextTurn() }
 
     }
@@ -193,6 +243,7 @@ class PlayerActionServiceTest {
 
         game.middleCards.addAll(controlledMiddleCard)
         currentPlayer.hand.add(Card(CardSuit.HEARTS, CardValue.TEN))
+
         // Before Swap Hand: [♥10], Middle: [♥7, ♠7]
         rootService.playerActionService.swapCard(currentPlayer.hand.last(), game.middleCards[1])
 
@@ -216,7 +267,7 @@ class PlayerActionServiceTest {
         game.middleCards.addAll(controlledMiddleCard)
         currentPlayer.hand.add(Card(CardSuit.HEARTS, CardValue.TEN))
 
-
+        //Checks that the invalid swap throws exception
         assertThrows<IllegalArgumentException> { rootService.playerActionService.swapCard(currentPlayer.hand.last(), game.middleCards[1])}
 
         assertFalse(currentPlayer.hasActionTaken && currentPlayer.hasSwapped)

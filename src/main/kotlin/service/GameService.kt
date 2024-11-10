@@ -5,7 +5,8 @@ import java.util.Stack
 import kotlin.random.Random
 
 /**
- * Service layer class which manages the game logic (startNewGame(), endTurn(), endGame(), createStandardDeck)
+ * Service layer class which manages the game logic that includes [startNewGame], [endTurn], [endGame], [createStandardDeck]
+ *
  * @param rootService The root service, which provides access to all other services
  */
 class GameService(private val rootService: RootService) : AbstractRefreshingService() {
@@ -91,6 +92,7 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
     fun endGame(){
         val game = rootService.currentGame
         checkNotNull(game)
+        game.isGameOver =true
 
         //Trigger refresh to tell the GUI that the turn has ended and shows the ResultGameScene (not yet implemented)
         onAllRefreshables { refreshAfterEndGame() }
@@ -98,7 +100,8 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
 
     /**
      * Creates a not-shuffled standard deck (52 cards) by creating all values for each suit (clubs, spades, hearts,diamonds)
-     * We keep it not-shuffled at first for testing purposes but the Standard-deck gets shuffled in the startNewGame()
+     * We keep it not-shuffled at first for testing purposes but the Standard-deck gets shuffled in the [startNewGame]
+     *
      * @return a not-shuffled card stack
      */
     private fun createStandardDeck(): Stack<Card> {

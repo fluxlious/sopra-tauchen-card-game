@@ -1,5 +1,6 @@
 package gui
 import entity.Card
+import entity.Player
 
 /**
  * This interface allows service layer classes to communicate with the GUI
@@ -39,6 +40,14 @@ interface Refreshable {
      * @param discardedCard the [Card] has been discarded.
      */
     fun refreshAfterDiscardCard(discardedCard : Card){}
+
+    /** Refreshes the GUI and pops a prompt that the player need to discard before ending the turn
+     *
+     * @param currentPlayer the player that the prompt will be shown
+     */
+    fun refreshAfterDiscardPrompt(currentPlayer : Player){
+        //TODO it will implemented when we dive into GUI
+    }
 
     /** Refreshes the GUI after the game has ended */
     fun refreshAfterEndGame(){}

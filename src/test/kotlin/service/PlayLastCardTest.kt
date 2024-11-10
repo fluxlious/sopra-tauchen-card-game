@@ -4,9 +4,16 @@ import org.junit.jupiter.api.Test
 import kotlin.test.*
 import entity.*
 import java.util.*
-
+/**
+ * Class for testing playLastCard.
+ */
 class PlayLastCardTest {
     private var rootService = RootService()
+
+    /**
+     * Sets up a new game before each test with [TestRefreshable]s attached to a newly created [RootService].
+     * Starts a new game before each test with two players (Alice,Bob)
+     */
     @BeforeTest
     fun setUp() {
         rootService = RootService()
@@ -14,6 +21,9 @@ class PlayLastCardTest {
 
 
     }
+    /**
+     * Tests playing the last card and ending the game
+     */
     @Test
     fun playLastCard() {
         val game = rootService.currentGame
@@ -28,6 +38,7 @@ class PlayLastCardTest {
         game.middleCards.add(Card(CardSuit.SPADES, CardValue.SEVEN))
         rootService.playerActionService.drawCard()
 
-        assertTrue { game.middleCards.isEmpty() && currentPlayer.score == 20}
+        //Checks if drawCard triggers playLastCard correctly and calls the endGame function
+        assertTrue (game.middleCards.isEmpty() && currentPlayer.score == 20 && game.isGameOver)
     }
 }
