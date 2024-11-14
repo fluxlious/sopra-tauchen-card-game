@@ -7,6 +7,7 @@ import entity.Player
  * by refreshing GUI component according to the certain changes in the game.
  */
 interface Refreshable {
+
     /** Refreshes the GUI after a new game has been started. */
     fun refreshAfterStartNewGame(){}
 

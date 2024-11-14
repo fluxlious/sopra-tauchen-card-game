@@ -6,10 +6,10 @@ import tools.aqua.bgw.components.uicomponents.*
 import tools.aqua.bgw.core.MenuScene
 import tools.aqua.bgw.util.*
 import tools.aqua.bgw.visual.ImageVisual
-import java.awt.Color
+
 import kotlin.system.exitProcess
 
-class MainMenuScene(rootService: RootService) : MenuScene(width = 1920, height = 1080, background = ImageVisual("background.png")) {
+class MainMenuScene(rootService: RootService) : MenuScene(width = 1920, height = 1080, background = ImageVisual("background.png")), Refreshable {
 
     val newGameButton: Button = Button(
         height = 150,
@@ -17,22 +17,21 @@ class MainMenuScene(rootService: RootService) : MenuScene(width = 1920, height =
         posX = 550,
         posY = 700,
         text = "",
-        font = Font(color = Color.WHITE, fontStyle = Font.FontStyle.ITALIC),
         visual = ImageVisual("play.png")
     ).apply {
         onMouseClicked = {
-            rootService.gameService.startNewGame(playerNames = listOf("Cem","Can"))
+            val playerNames = mutableListOf(p1Input.text,p2Input.text)
+            rootService.gameService.startNewGame(playerNames)
         }
     }
 
 
-    val quitButton: Button = Button(
+    private val quitButton: Button = Button(
         height = 150,
         width = 400,
         posX =  1000,
         posY =  700,
         text = "",
-        font = Font(color = Color.WHITE, fontStyle = Font.FontStyle.ITALIC),
         visual = ImageVisual("quit.png")
     ).apply { onMouseClicked = {
                     exitProcess(0)
@@ -46,6 +45,7 @@ class MainMenuScene(rootService: RootService) : MenuScene(width = 1920, height =
         text = "Player 1:",
         font = Font(42)
     )
+
     private val p1Input: TextField = TextField(
         width = 400, height = 80,
         posX = 820,
@@ -78,8 +78,6 @@ class MainMenuScene(rootService: RootService) : MenuScene(width = 1920, height =
             newGameButton.isDisabled = p1Input.text.isBlank() || this.text.isBlank()
         }
     }
-
-
 
     private val menuLabel: Label = Label(
         height = 100,

@@ -3,7 +3,7 @@ package gui
 import service.RootService
 import tools.aqua.bgw.core.BoardGameApplication
 
-class SopraApplication : BoardGameApplication("SoPra Game") {
+class SopraApplication : BoardGameApplication("SoPra Game"), Refreshable {
     private val rootService = RootService()
 
 
@@ -12,9 +12,22 @@ class SopraApplication : BoardGameApplication("SoPra Game") {
     private val gameScene = GameScene(rootService)
     private val mainMenuScene = MainMenuScene(rootService)
 
+
     init {
+        rootService.addRefreshables(
+            this,
+            mainMenuScene,
+            //TODO resultMenuScene
+            gameScene
+        )
+
+        this.showGameScene(gameScene)
         this.showMenuScene(mainMenuScene)
     }
 
+    override fun refreshAfterStartNewGame() {
+        hideMenuScene(500)
+
+    }
 }
 
