@@ -212,7 +212,7 @@ class PlayerActionServiceTest {
         //cannot draw again
         assertThrows<IllegalStateException> {rootService.playerActionService.drawCard()}
 
-        //Checks if the player has 6 cards after drawing
+        //Checks if the player has 2 cards after drawing
         assertTrue(currentPlayer.hand.size == 2)
         assertTrue(currentPlayer.hand.contains(Card(CardSuit.DIAMONDS, CardValue.THREE) ))
 
