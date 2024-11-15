@@ -63,7 +63,7 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
         checkNotNull(game)
 
         //println("${game.players[game.currentPlayerIndex].name} starts")
-
+        println(game.players[game.currentPlayerIndex].hand)
         //Trigger refresh to tell the GUI that the turn has started
         onAllRefreshables {refreshAfterStartTurn() }
 
