@@ -10,7 +10,7 @@ import tools.aqua.bgw.visual.ImageVisual
  * as the order in which the suits are declared in [CardSuit], mappings via [row] and [column]
  * are required.
  */
-private const val CARDS_FILE = "card_deck.png"
+private const val CARDS_FILE = "card_deck2.png"
 
 private const val IMG_HEIGHT = 200
 private const val IMG_WIDTH = 130

@@ -18,19 +18,22 @@ import tools.aqua.bgw.visual.ColorVisual
 import tools.aqua.bgw.visual.ImageVisual
 import java.awt.Color
 
-class GameScene(private val rootService: RootService) : BoardGameScene(1920, 1080, background = ImageVisual("background.jpg")), Refreshable {
+class GameScene(private val rootService: RootService) : BoardGameScene(1920, 1080, background = ImageVisual("game_background4.png")), Refreshable {
+
     val cardImageLoader: CardImageLoader = CardImageLoader()
     val cards: BidirectionalMap<Card, CardView> = BidirectionalMap()
+
     val drawPile: CardView = CardView(
-        height = 250,
-        width = 162.0,
+        height = 231,
+        width = 150,
         posX = 370,
         posY = 425,
-        front = cardImageLoader.backImage
+        front = cardImageLoader.backImage,
     )
+
     private val drawPileCount = Label(
-        height = 250,
-        width = 162.0,
+        height = 231,
+        width = 150,
         posX = 370,
         posY = 425,
         text = "0",//inital value
@@ -42,70 +45,76 @@ class GameScene(private val rootService: RootService) : BoardGameScene(1920, 108
         }
     }
 
-
     val discardPile: CardStack<CardView> = CardStack(
-        height = 250,
-        width = 162.0,
+        height = 251,
+        width = 170,
         posX = 1230,
         posY = 425,
-        visual = ColorVisual(255, 255, 255, 50)
+        visual = ColorVisual(255, 255, 255, 50),
+        alignment = Alignment.CENTER,
     )
-    val middleCards: LinearLayout<CardView> = LinearLayout(
-        height = 220,
+
+    val middleCards = LinearLayout<CardView>(
+        height = 251,
         width = 420,
         posX = 750,
         posY = 360,
         spacing = 30,
         visual = ColorVisual(255, 255, 255, 50)
-    )
+    ).apply {
+        dropAcceptor = { dragEvent ->
+            val draggedComponent = dragEvent.draggedComponent
 
-    var currentPlayerHand = LinearLayout<CardView>(
-        height = 220,
+            //check the dragged components is CardView and its in the currentPlayers' hand
+            draggedComponent is CardView && currentPlayerHand.contains(draggedComponent)
+
+            //we get the card : Card with backwards mapping CardView -> Card
+            val card = cards.backward(draggedComponent as CardView)
+            rootService.playerActionService.isCardValid(card)
+        }
+        onDragDropped = { dragEvent ->
+            val cardView = dragEvent.draggedComponent as CardView
+            val card = cards.backward(cardView)
+
+            // Play the card
+            rootService.playerActionService.playCard(card)
+
+        }
+    }
+
+    private var currentPlayerHand = LinearLayout<CardView>(
+        height = 251,
         width = 800,
         posX = 560,
         posY = 750,
         spacing = -30,
-        //visual = ColorVisual(255, 255, 255, 50),
-        //alignment = Alignment.CENTER
+        visual = ColorVisual(255, 255, 255, 50),
+        alignment = Alignment.CENTER
     )
 
+    var otherPlayerHand = LinearLayout<CardView>(
+        height = 251,
+        width = 800,
+        posX = 560,
+        posY = 50,
+        spacing = -30,
+        alignment = Alignment.CENTER,
+        visual = ColorVisual(255, 255, 255, 50)
+    ).apply {
+        rotation = 180.0
+    }
+
     var currentPlayerScoringPile = LinearLayout<CardView>(
-        height = 250,
-        width = 162.0,
+        height = 251,
+        width = 170,
         posX = 1420,
         posY = 750,
         visual = ColorVisual(255, 255, 255, 50)
 
     )
-    val nextTurn = Button(
-        height = 200,
-        width = 200,
-        posX = 50,
-        posY = 540,
-        text = "Next turn",
-        alignment = Alignment.CENTER,
-
-    ).apply {
-        onMouseClicked = {
-            rootService.gameService.endTurn()
-        }
-
-    }
-    var otherPlayerHand = LinearLayout<CardView>(
-        height = 220,
-        width = 800,
-        posX = 560,
-        posY = 140,
-        spacing = -30,
-        //alignment = Alignment.CENTER,
-        //visual = ColorVisual(255, 255, 255, 50)
-    ).apply {
-        rotation = 180.0
-    }
-
     var otherPlayerScoringPile: LinearLayout<CardView> = LinearLayout<CardView>(
-        height = 250,
-        width = 162.0,
+        height = 251,
+        width = 170,
         posX = 370,
         posY = 50,
         visual = ColorVisual(255, 255, 255, 50)
@@ -113,31 +122,69 @@ class GameScene(private val rootService: RootService) : BoardGameScene(1920, 108
     ).apply {
         rotation = 180.0
     }
+    var currentPlayerScore = Label(
+        height = 50,
+        width = 170,
+        posX = 1420,
+        posY = 1002,
+        text = "Score: 0",
+        alignment = Alignment.CENTER,
+        visual = ColorVisual(Color(0x0C2027)),
+        font = Font(30, Color(0xFFFFFFF), "Staatliches")
+    )
+    var otherPlayerScore = Label(
+        height = 50,
+        width = 170,
+        posX = 370,
+        posY = 0,
+        text = "Score: 0",
+        alignment = Alignment.CENTER,
+        visual = ColorVisual(Color(0x0C2027)),
+        font = Font(30, Color(0xFFFFFFF), "Staatliches")
+    )
+
 
     //player name labels
     private val currentPlayerName = Label(
         height = 50,
         width = 200,
-        posX = 750,
-        posY = 650,
+        posX = 560,
+        posY = 1002,
         text = "Spieler",
         alignment = Alignment.CENTER,
         visual = ColorVisual(Color(0x0C2027)),
-        font = Font(30, Color(0xFFFFFFF), "JetBrains Mono ExtraBold")
+        font = Font(30, Color(0xFFFFFFF), "Staatliches")
+
     )
+
     private val otherPlayerName = Label(
         height = 50,
         width = 200,
-        posX = 750,
-        posY = 50,
+        posX = 560 + 800 - 200,
+        posY = 0,
         text = "Spieler",
         alignment = Alignment.CENTER,
         visual = ColorVisual(Color(0x0C2027)),
-        font = Font(30, Color(0xFFFFFFF), "A")
-
+        font = Font(30, Color(0xFFFFFFF), "Staatliches")
 
     )
+    val nextTurn = Button(
+        height = 251,
+        width = 150,
+        posX = 370,
+        posY = 750,
+        text = "Next" +
+                "turn",
+        alignment = Alignment.CENTER,
+        visual = ColorVisual(Color(0x0C2027)),
+        font = Font(10, Color(0xFFFFFFF), "Staatliches")
 
+        ).apply {
+        onMouseClicked = {
+            rootService.playerActionService.nextTurn()
+        }
+
+    }
 
     init {
         addComponents(
@@ -148,11 +195,15 @@ class GameScene(private val rootService: RootService) : BoardGameScene(1920, 108
             currentPlayerHand,
             currentPlayerScoringPile,
             currentPlayerName,
+            currentPlayerScore,
             otherPlayerHand,
             otherPlayerScoringPile,
             otherPlayerName,
+            otherPlayerScore,
             nextTurn
         )
+
+
     }
 
     override fun refreshAfterStartNewGame() {
@@ -164,8 +215,8 @@ class GameScene(private val rootService: RootService) : BoardGameScene(1920, 108
         CardValue.values().forEach { value ->
             CardSuit.values().forEach { suit ->
                 cards[Card(suit, value)] = CardView(
-                    width = 130,
-                    height = 200,
+                    height = 231,
+                    width = 150,
                     front = cardImageLoader.frontImageFor(suit, value),
                     back = cardImageLoader.backImage
                 )
@@ -183,9 +234,13 @@ class GameScene(private val rootService: RootService) : BoardGameScene(1920, 108
 
             //change the current players label
             currentPlayerName.text = game.players[game.currentPlayerIndex].name
+            currentPlayerScore.text = "Score: " + game.players[game.currentPlayerIndex].score.toString()
 
             //get the index of other player with modulo
             val otherPlayer = game.players[(game.currentPlayerIndex +1) % 2]
+
+            otherPlayerName.text = otherPlayer.name
+            otherPlayerScore.text = "Score: " + otherPlayer.score.toString()
             otherPlayerHand.clear()
 
             currentPlayerHand.clear()
@@ -208,40 +263,67 @@ class GameScene(private val rootService: RootService) : BoardGameScene(1920, 108
 
         }
 
+    override fun refreshAfterPlayCard(playedCard: Card) {
+        val game = rootService.currentGame ?: return
+
+        val cardView = (cards[playedCard] as CardView).apply {
+            isDraggable = false
+            onMouseEntered = null
+            onMouseExited = null
+        }
+
+        currentPlayerHand.remove(cardView)
+        middleCards.add(cardView)
+    }
+
+    override fun refreshAfterTakeTrio() {
+        val game = rootService.currentGame ?: return
+        game.middleCards.forEach { card ->
+            currentPlayerScoringPile.add(
+                (cards[card] as CardView).apply {
+                    this.showFront()
+                }
+            )
+
+        }
+        middleCards.clear()
+        currentPlayerScore.text = "Score: " + game.players[game.currentPlayerIndex].score.toString()
+    }
     override fun refreshAfterDrawCard(drawnCard: Card) {
+        val game = rootService.currentGame ?: return
             currentPlayerHand.add(
                 (cards[drawnCard] as CardView).apply {
                     applyHoverEffect(this)
                 }
             )
+        drawPileCount.text = game.drawPile.size.toString()
+
     }
 
-
-        private fun applyHoverEffect(cardView: CardView) {
-            cardView.onMouseEntered = {
+    private fun applyHoverEffect(cardView: CardView) {
+        cardView.onMouseEntered = {
                 cardView.posY -= 25
             }
-            cardView.onMouseExited = {
+        cardView.onMouseExited = {
                 cardView.posY += 25
             }
-            cardView.width = 162.0
-            cardView.height = 250.0
-            cardView.rotation = 0.0
-            cardView.showFront()
-            cardView.isDraggable = true
+
+        cardView.width = 150.0
+        cardView.height = 231.0
+        cardView.rotation = 0.0
+        cardView.showFront()
+        cardView.isDraggable = true
         }
 
     private fun removeHoverEffect(cardView: CardView) {
         cardView.onMouseEntered = null
         cardView.onMouseExited = null
-        cardView.width = 162.0
-        cardView.height = 250.0
+        cardView.width = 150.0
+        cardView.height = 231.0
         cardView.rotation = 0.0
         cardView.showBack()
         cardView.isDraggable = false
     }
-
-
 
 }
 

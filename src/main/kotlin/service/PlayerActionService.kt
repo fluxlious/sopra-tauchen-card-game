@@ -43,7 +43,9 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
 
         // Check if the card is a normal play or the last drawn card
         if (card != currentPlayer.lastDrawnCard && currentPlayer.hasActionTaken) {
+            println(currentPlayer.hand)
             throw IllegalStateException("You can only play the last drawn card in the same turn.")
+
         }
         middleCards.add(card)
         currentPlayer.hand.remove(card)
@@ -53,6 +55,7 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
         // Check trio formation if there are three cards in the middle after playing the card
         if (middleCards.size == 3) {
             takeTrioAndAddToScoringPile()
+            onAllRefreshables { refreshAfterTakeTrio() }
             // Reset swap ability for both players
             game.players.forEach { it.hasSwapped = false }
         }
@@ -292,7 +295,7 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
      * @return true if the [card] can be legally played if it matches the middle cards either by suit or value
      * @throws IllegalStateException if no game is currently active
      */
-    private fun isCardValid(card: Card): Boolean {
+    fun isCardValid(card: Card): Boolean {
         val game = rootService.currentGame
         checkNotNull(game)
         val middleCards = game.middleCards

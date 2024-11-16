@@ -27,6 +27,7 @@ interface Refreshable {
      *
      * @param drawnCard the [Card] has been drawn
      */
+    fun refreshAfterTakeTrio(){}
     fun refreshAfterDrawCard(drawnCard: Card){}
 
     /** Refreshes the GUI after a swap action has taken place
