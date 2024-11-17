@@ -60,7 +60,7 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
             game.players.forEach { it.hasSwapped = false }
         }
 
-        nextTurn()
+        //nextTurn()
 
     }
 
@@ -112,9 +112,6 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
         checkNotNull(game)
         val currentPlayer = game.players[game.currentPlayerIndex]
 
-        if (currentPlayer.hand.size > 8) {
-            throw IllegalStateException("Player already has more than 8 cards in hand.")
-        }
         if(game.drawPile.isEmpty()) {
             throw IllegalStateException("Draw pile is empty")
         }
@@ -322,24 +319,19 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
         checkNotNull(game)
         val currentPlayer = game.players[game.currentPlayerIndex]
         if(currentPlayer.hasActionTaken){
-
+            if(currentPlayer.hand.size > 8){
+                onAllRefreshables { refreshAfterDiscardPrompt(currentPlayer) }
+                throw IllegalStateException("You need to discard a card before ending the turn")
+            }
             currentPlayer.hasActionTaken = false
             currentPlayer.hasSwapped = false
             currentPlayer.lastDrawnCard = null
-
-            if(currentPlayer.hand.size > 8){
-                onAllRefreshables { refreshAfterDiscardPrompt(currentPlayer) }
-                discardCard(currentPlayer.hand.last())
-                //Normally discard card will come from gui, so currentPlayer.hand.last() is just a placeholder default.
-                //It will be changed when we add a GUI that asks for the player
-                //to choose a card to discard before ending his/her turn
-            }
 
             rootService.gameService.endTurn()
 
         }
         else{
-            throw IllegalStateException("Player didnt perform any action.")
+            throw IllegalStateException("You didnt perform any action.")
         }
 
     }

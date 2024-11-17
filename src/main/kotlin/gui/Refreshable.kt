@@ -23,11 +23,12 @@ interface Refreshable {
      */
     fun refreshAfterPlayCard(playedCard: Card){}
 
+    //TODO add kdoc for refreshAfterTakeTrio
+    fun refreshAfterTakeTrio(){}
     /** Refreshes the GUI after a card has been played.
      *
      * @param drawnCard the [Card] has been drawn
      */
-    fun refreshAfterTakeTrio(){}
     fun refreshAfterDrawCard(drawnCard: Card){}
 
     /** Refreshes the GUI after a swap action has taken place
@@ -48,13 +49,11 @@ interface Refreshable {
      * @param currentPlayer the player that the prompt will be shown
      */
     fun refreshAfterDiscardPrompt(currentPlayer : Player){
-        //TODO it will implemented when we dive into GUI
     }
 
     /** Refreshes the GUI after the game has ended */
     fun refreshAfterEndGame(){}
 
-    //TODO not yet implemented in the game logic, i will try to implement in the GUI
     /** Refreshes the GUI after the game has been restarted. */
     fun refreshAfterGameRestart() {}
 
