@@ -5,6 +5,7 @@ import entity.CardSuit
 import entity.CardValue
 import entity.Player
 import service.CardImageLoader
+import service.GameService
 import service.RootService
 import tools.aqua.bgw.animation.Animation
 import tools.aqua.bgw.animation.ComponentAnimation
@@ -33,6 +34,8 @@ class GameScene(private val rootService: RootService) : BoardGameScene(1920, 108
 
     private val cardImageLoader: CardImageLoader = CardImageLoader()
     val cards: BidirectionalMap<Card, CardView> = BidirectionalMap()
+    private var selectedCardFromHand: CardView? = null
+    private var selectedCardFromMiddle: CardView? = null
 
     private var drawPile = CardStack<CardView>(
         height = 231,
@@ -80,6 +83,7 @@ class GameScene(private val rootService: RootService) : BoardGameScene(1920, 108
             val card = cards.backward(cardView)
             rootService.playerActionService.discardCard(card)
         }
+
     }
 
     val middleCards = LinearLayout<CardView>(
@@ -90,6 +94,7 @@ class GameScene(private val rootService: RootService) : BoardGameScene(1920, 108
         spacing = 30,
         visual = ColorVisual(255, 255, 255, 50)
     ).apply {
+
         //needs boolean
         dropAcceptor = { dragEvent ->
             val draggedComponent = dragEvent.draggedComponent
@@ -117,6 +122,67 @@ class GameScene(private val rootService: RootService) : BoardGameScene(1920, 108
             rootService.playerActionService.playCard(card)
 
         }
+
+
+    }
+
+    private fun swapMode() {
+        currentPlayerHand.forEach { cardView ->
+            cardView.isDraggable = false
+            cardView.onMouseClicked = {
+                println("You clicked on ${cards.backward(cardView)}")
+                handleCardSelection(cardView, isFromHand = true)
+            }
+        }
+
+        middleCards.forEach { cardView ->
+            cardView.onMouseClicked = {
+                println("You clicked on ${cards.backward(cardView)}")
+                cardView.isDraggable = false
+                handleCardSelection(cardView, isFromHand = false)
+            }
+        }
+
+    }
+    private fun tryPerformSwap() {
+        if (selectedCardFromHand != null && selectedCardFromMiddle != null) {
+            val cardFromHand = cards.backward(selectedCardFromHand!!)
+            val cardFromMiddle = cards.backward(selectedCardFromMiddle!!)
+
+            try {
+                rootService.playerActionService.swapCard(cardFromHand, cardFromMiddle)
+                println("Swap successful!")
+            } catch (e: Exception) {
+                println("Swap failed: ${e.message}")
+            } finally {
+                resetSwap()
+            }
+        }
+    }
+
+    private fun resetSwap() {
+        selectedCardFromHand = null
+        selectedCardFromMiddle = null
+        currentPlayerHand.forEach { cardView ->
+            cardView.apply {onMouseClicked = null}
+            applyHoverEffect(cardView)
+        }
+
+        // Remove click listeners from middle cards
+        middleCards.components.forEach { cardView ->
+            cardView.apply { onMouseClicked = null}
+            removeHoverEffect(cardView, showFront = true)
+        }
+    }
+
+    private fun handleCardSelection(cardView: CardView, isFromHand: Boolean) {
+        if(isFromHand){
+            selectedCardFromHand = cardView
+        }
+        else {
+            selectedCardFromMiddle = cardView
+        }
+        tryPerformSwap()
     }
 
     private var currentPlayerHand = LinearLayout<CardView>(
@@ -171,6 +237,7 @@ class GameScene(private val rootService: RootService) : BoardGameScene(1920, 108
         visual = ColorVisual(Color(0x0C2027)),
         font = Font(30, Color(0xFFFFFFF), "Staatliches")
     )
+
     var otherPlayerScore = Label(
         height = 50,
         width = 170,
@@ -181,7 +248,6 @@ class GameScene(private val rootService: RootService) : BoardGameScene(1920, 108
         visual = ColorVisual(Color(0x0C2027)),
         font = Font(30, Color(0xFFFFFFF), "Staatliches")
     )
-
 
     //player name labels
     private val currentPlayerName = Label(
@@ -234,24 +300,31 @@ class GameScene(private val rootService: RootService) : BoardGameScene(1920, 108
 
     ).apply {
         onMouseClicked = {
-            try {
-
-            } catch (e: IllegalArgumentException) {
-                println("Swap invalid: ${e.message}")
-            } catch (e: IllegalStateException) {
-                println("Swap not allowed: ${e.message}")
-            }
+            swapMode()
         }
     }
-    private val overlayPane = Pane<ComponentView>(
-        posX = 0,
-        posY = 0,
-        width = 1920,
-        height = 1080,
-        visual = ColorVisual(Color(12, 32, 39, 240))
-    ).apply {
-        this.isVisible = false
-    }
+//    private val overlayPane = Pane<ComponentView>(
+//        posX = 0,
+//        posY = 0,
+//        width = 1920,
+//        height = 1080,
+//        visual = ColorVisual(Color(12, 32, 39))
+//    ).apply {
+//        this.isVisible = false
+//    }
+//    private val button = Button(
+//        height = 132,
+//        width = 150,
+//        posX = 0,
+//        posY = 0,
+//        text = "asdasdasd",
+//        visual = ColorVisual(Color(0x0C2027)),
+//        font = Font(22, Color(0xFFFFFFF), "Staatliches")
+//    ).apply {
+//        onMouseClicked = {
+//            this@GameScene.overlayPane.isVisible = true
+//        }
+//    }
 
 
     init {
@@ -270,8 +343,9 @@ class GameScene(private val rootService: RootService) : BoardGameScene(1920, 108
             otherPlayerScore,
             nextTurn,
             swapButton,
-            overlayPane,
-            middleCards
+            middleCards,
+//            button,
+//            overlayPane
         )
 
 
@@ -280,6 +354,9 @@ class GameScene(private val rootService: RootService) : BoardGameScene(1920, 108
         //create the CardViews for each value and suit combination
         // and add it to BidirectionalMap
         val game = rootService.currentGame ?: return
+        //Clear swapping selection
+        selectedCardFromHand = null
+        selectedCardFromMiddle = null
 
         cards.clear()
         CardValue.values().forEach { value ->
@@ -308,6 +385,8 @@ class GameScene(private val rootService: RootService) : BoardGameScene(1920, 108
         currentPlayerHand.clear()
         currentPlayerScoringPile.clear()
 
+        swapButton.isDisabled = false
+
 
         //get the index of other player with modulo
         val otherPlayer = game.players[(game.currentPlayerIndex + 1) % 2]
@@ -319,14 +398,9 @@ class GameScene(private val rootService: RootService) : BoardGameScene(1920, 108
         updateScoreView()
 
         game.players[game.currentPlayerIndex].hand.forEach { card ->
-            currentPlayerHand.add(
-                (cards[card] as CardView).apply {
-                    applyHoverEffect(this)
-                    onMouseClicked = {
-                        selectCard(this,true)
-                  }
-                }
-            )
+            currentPlayerHand.add((cards[card] as CardView).apply {
+                applyHoverEffect(this)
+            })
         }
         //adjust the scoring pile of current player
         if(game.players[game.currentPlayerIndex].scoringPile.isNotEmpty()){
@@ -338,7 +412,6 @@ class GameScene(private val rootService: RootService) : BoardGameScene(1920, 108
                         }
                     )
                 }
-
             }
         }
 
@@ -346,7 +419,7 @@ class GameScene(private val rootService: RootService) : BoardGameScene(1920, 108
         otherPlayer.hand.forEach { card ->
             otherPlayerHand.add(
                 (cards[card] as CardView).apply {
-                    removeHoverEffect(this,showFront = false)
+                    removeHoverEffect(this, showFront = false)
                 }
             )
         }
@@ -360,27 +433,18 @@ class GameScene(private val rootService: RootService) : BoardGameScene(1920, 108
                         }
                     )
                 }
-
             }
         }
 
 
     }
 
-    private fun selectCard(cardView: CardView, b: Boolean) {
-        cardView.apply {
-            this.isDraggable = false
-            this.posY -= 25
-        }
-    }
 
     override fun refreshAfterPlayCard(playedCard: Card) {
         val game = rootService.currentGame ?: return
 
         val playedCardView = (cards[playedCard] as CardView).apply {
-            isDraggable = false
-            onMouseEntered = null
-            onMouseExited = null
+            removeHoverEffect(this, showFront = true)
         }
         currentPlayerHand.remove(playedCardView)
         middleCards.add(playedCardView)
@@ -390,6 +454,7 @@ class GameScene(private val rootService: RootService) : BoardGameScene(1920, 108
         val game = rootService.currentGame ?: return
 
         game.players[game.currentPlayerIndex].scoringPile.last().forEach() { card ->
+
             lock()
             val middleCardView = (cards[card] as CardView)
             this.playAnimation(MovementAnimation.toComponentView(
@@ -404,31 +469,58 @@ class GameScene(private val rootService: RootService) : BoardGameScene(1920, 108
                         this.showFront()
                     })
                     unlock()
-
                 }
             })
 
 
 
-
-
         }
-
-
-//        middleCards.clear()
-//        game.players[game.currentPlayerIndex].scoringPile.last().forEach() { card ->
-//            currentPlayerScoringPile.add(
-//                (cards[card] as CardView).apply {
-//                    this.showFront()
-//
-//                }
-//            )
-//        }
-
        updateScoreView()
     }
 
     override fun refreshAfterSwapCard(cardFromHand: Card, cardFromMiddle: Card) {
+        val cardFromHandView = cards[cardFromHand] as CardView
+        val cardFromMiddleView = cards[cardFromMiddle] as CardView
+        swapButton.isDisabled = true
+
+        val handCardIndex = currentPlayerHand.components.indexOf(cardFromHandView)
+        val middleCardIndex = middleCards.components.indexOf(cardFromMiddleView)
+        //movement animation from hand to middle
+        lock()
+        playAnimation(MovementAnimation.toComponentView(
+            componentView = cardFromHandView,
+            toComponentViewPosition = middleCards.components[handCardIndex],
+            scene = this,
+            duration = 2000
+        ).apply {
+            onFinished = {
+                //remove the CardView from currentPlayerHand
+                currentPlayerHand.remove(cardFromHandView)
+                middleCards.add(cardFromHandView.apply {
+                    removeHoverEffect(this, showFront = true)
+                }, middleCardIndex)
+                unlock()
+            }
+        })
+        lock()
+        //movement animation from middle to hand
+        playAnimation(MovementAnimation.toComponentView(
+            componentView = cardFromMiddleView,
+            toComponentViewPosition = currentPlayerHand.components[handCardIndex],
+            scene = this,
+            duration = 2000
+        ).apply {
+            onFinished = {
+
+                middleCards.remove(cardFromMiddleView)
+                currentPlayerHand.add(cardFromMiddleView.apply {
+                    applyHoverEffect(this)
+                }, handCardIndex-1)
+                unlock()
+            }
+        })
+
+
 
     }
     override fun refreshAfterDiscardPrompt(currentPlayer: Player) {
@@ -446,9 +538,7 @@ class GameScene(private val rootService: RootService) : BoardGameScene(1920, 108
         currentPlayerHand.remove(discardedCardView) //TODO deleting operation could be inside onDragDropped
 
         discardPile.add(discardedCardView.apply {
-            isDraggable = false
-            onMouseEntered = null
-            onMouseExited = null
+            removeHoverEffect(this, showFront = true)
         })
 
     }
@@ -517,11 +607,11 @@ class GameScene(private val rootService: RootService) : BoardGameScene(1920, 108
     private fun updateScoreView() {
         val game = rootService.currentGame ?: return
         val currentPlayer = game.players[game.currentPlayerIndex]
-        val opponentPlayer = game.players[(game.currentPlayerIndex + 1) % 2]
+        val otherPlayer = game.players[(game.currentPlayerIndex + 1) % 2]
 
-        // Update the text of score labels based on the current score
+        // Update the text of score
         currentPlayerScore.text = "Score: ${currentPlayer.score}"
-        otherPlayerScore.text = "Score: ${opponentPlayer.score}"
+        otherPlayerScore.text = "Score: ${otherPlayer.score}"
 
     }
 }

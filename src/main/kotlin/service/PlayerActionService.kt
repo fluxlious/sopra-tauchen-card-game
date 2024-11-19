@@ -213,11 +213,19 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
 
 
         if(isSwapValid(cardFromHand, cardFromMiddle, middleCards)) {
-            currentPlayer.hand.remove(cardFromHand)
-            currentPlayer.hand.add(cardFromMiddle)
-            middleCards.remove(cardFromMiddle)
-            middleCards.add(cardFromHand)
+            //keep the indexes for animation purposes
+            val handCardIndex = currentPlayer.hand.indexOf(cardFromHand)
+            val middleCardIndex = middleCards.indexOf(cardFromMiddle)
 
+            // Remove and add cards in the middle
+            currentPlayer.hand.remove(cardFromHand)
+            currentPlayer.hand.add(handCardIndex, cardFromMiddle)
+
+            middleCards.remove(cardFromMiddle)
+            middleCards.add(middleCardIndex,cardFromMiddle)
+
+            println("Middle: " + game.middleCards)
+            println("Hand of ${currentPlayer.name} ${currentPlayer.hand}")
             // Mark the swap as used and action taken
             currentPlayer.hasSwapped = true
             currentPlayer.hasActionTaken = true
@@ -328,7 +336,7 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
             currentPlayer.lastDrawnCard = null
 
             rootService.gameService.endTurn()
-
+            println(" after next Turn middle: " + game.middleCards)
         }
         else{
             throw IllegalStateException("You didnt perform any action.")
