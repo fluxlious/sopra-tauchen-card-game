@@ -217,12 +217,9 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
             val handCardIndex = currentPlayer.hand.indexOf(cardFromHand)
             val middleCardIndex = middleCards.indexOf(cardFromMiddle)
 
-            // Remove and add cards in the middle
-            currentPlayer.hand.remove(cardFromHand)
-            currentPlayer.hand.add(handCardIndex, cardFromMiddle)
 
-            middleCards.remove(cardFromMiddle)
-            middleCards.add(middleCardIndex,cardFromMiddle)
+            currentPlayer.hand[handCardIndex] = cardFromMiddle
+            middleCards[middleCardIndex] = cardFromHand
 
             println("Middle: " + game.middleCards)
             println("Hand of ${currentPlayer.name} ${currentPlayer.hand}")

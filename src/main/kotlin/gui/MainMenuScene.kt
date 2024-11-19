@@ -11,7 +11,7 @@ import kotlin.system.exitProcess
 
 class MainMenuScene(rootService: RootService) : MenuScene(width = 1920, height = 1080, background = ImageVisual("background.png")), Refreshable {
 
-    val newGameButton: Button = Button(
+    private val newGameButton: Button = Button(
         height = 150,
         width = 400,
         posX = 550,
@@ -20,11 +20,10 @@ class MainMenuScene(rootService: RootService) : MenuScene(width = 1920, height =
         visual = ImageVisual("play.png")
     ).apply {
         onMouseClicked = {
-            val playerNames = mutableListOf(p1Input.text,p2Input.text)
+            val playerNames = mutableListOf(player1Input.text, player2Input.text)
             rootService.gameService.startNewGame(playerNames)
         }
     }
-
 
     private val quitButton: Button = Button(
         height = 150,
@@ -34,11 +33,11 @@ class MainMenuScene(rootService: RootService) : MenuScene(width = 1920, height =
         text = "",
         visual = ImageVisual("quit.png")
     ).apply { onMouseClicked = {
-                    exitProcess(0)
+        exitProcess(0)
     }
 }
 
-    private val p1Label = Label(
+    private val player1Label = Label(
         width = 200, height = 80,
         posX = 610,
         posY = 350,
@@ -46,7 +45,7 @@ class MainMenuScene(rootService: RootService) : MenuScene(width = 1920, height =
         font = Font(42)
     )
 
-    private val p1Input: TextField = TextField(
+    private val player1Input: TextField = TextField(
         width = 400, height = 80,
         posX = 820,
         posY = 350,
@@ -55,11 +54,11 @@ class MainMenuScene(rootService: RootService) : MenuScene(width = 1920, height =
 
     ).apply {
         onKeyTyped = {
-            newGameButton.isDisabled = this.text.isBlank() || p2Input.text.isBlank()
+            newGameButton.isDisabled = this.text.isBlank() || player2Input.text.isBlank()
         }
     }
 
-    private val p2Label = Label(
+    private val player2Label = Label(
         width = 200, height = 80,
         posX = 610,
         posY = 450,
@@ -67,7 +66,7 @@ class MainMenuScene(rootService: RootService) : MenuScene(width = 1920, height =
         font = Font(42)
     )
 
-    private val p2Input: TextField = TextField(
+    private val player2Input: TextField = TextField(
         width = 400, height = 80,
         posX = 820,
         posY = 450,
@@ -75,7 +74,7 @@ class MainMenuScene(rootService: RootService) : MenuScene(width = 1920, height =
         font = Font(42)
     ).apply {
         onKeyTyped = {
-            newGameButton.isDisabled = p1Input.text.isBlank() || this.text.isBlank()
+            newGameButton.isDisabled = player1Input.text.isBlank() || this.text.isBlank()
         }
     }
 
@@ -93,8 +92,8 @@ class MainMenuScene(rootService: RootService) : MenuScene(width = 1920, height =
             menuLabel,
             newGameButton,
             quitButton,
-            p1Label, p1Input,
-            p2Label, p2Input
+            player1Label, player1Input,
+            player2Label, player2Input
 
         )
     }
