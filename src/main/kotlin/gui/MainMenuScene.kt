@@ -13,7 +13,7 @@ class MainMenuScene(rootService: RootService) : MenuScene(width = 1920, height =
 
     private val newGameButton: Button = Button(
         height = 150,
-        width = 400,
+        width = 350,
         posX = 550,
         posY = 700,
         text = "",
@@ -27,7 +27,7 @@ class MainMenuScene(rootService: RootService) : MenuScene(width = 1920, height =
 
     private val quitButton: Button = Button(
         height = 150,
-        width = 400,
+        width = 350,
         posX =  1000,
         posY =  700,
         text = "",
@@ -78,18 +78,9 @@ class MainMenuScene(rootService: RootService) : MenuScene(width = 1920, height =
         }
     }
 
-    private val menuLabel: Label = Label(
-        height = 100,
-        width = 200,
-        posX = 50,
-        posY = 0,
-        text = "",
-        font = Font(fontWeight = Font.FontWeight.BOLD)
-    )
 
     init {
         addComponents(
-            menuLabel,
             newGameButton,
             quitButton,
             player1Label, player1Input,

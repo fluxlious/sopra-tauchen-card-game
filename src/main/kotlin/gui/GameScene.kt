@@ -9,12 +9,9 @@ import service.CardImageLoader
 import service.RootService
 
 import tools.aqua.bgw.animation.MovementAnimation
-import tools.aqua.bgw.animation.ParallelAnimation
-import tools.aqua.bgw.animation.SequentialAnimation
 import tools.aqua.bgw.components.container.CardStack
 import tools.aqua.bgw.components.container.LinearLayout
 import tools.aqua.bgw.components.gamecomponentviews.CardView
-import tools.aqua.bgw.components.layoutviews.GridPane
 import tools.aqua.bgw.components.uicomponents.Button
 import tools.aqua.bgw.components.uicomponents.Label
 import tools.aqua.bgw.core.Alignment
@@ -84,10 +81,11 @@ class GameScene(private val rootService: RootService) : BoardGameScene(1920, 108
 
     private val middleCards = LinearLayout<CardView>(
         height = 251,
-        width = 420,
+        width = 480,
         posX = 750,
         posY = 425,
         spacing = 30,
+        alignment = Alignment.CENTER,
         visual = ColorVisual(255, 255, 255, 50)
     ).apply {
 
@@ -159,7 +157,7 @@ class GameScene(private val rootService: RootService) : BoardGameScene(1920, 108
 
             try {
                 rootService.playerActionService.swapCard(cardFromHand, cardFromMiddle)
-                println("Swap successful!")
+                //println("Swap successful!")
             } catch (e: Exception) {
                 println("Swap failed: ${e.message}")
             } finally {
@@ -167,7 +165,7 @@ class GameScene(private val rootService: RootService) : BoardGameScene(1920, 108
             }
         }
     }
-    //reset the changes made in the swap mode and continue with normal card settings
+    //Reset the changes made in the swap mode and continue with normal card settings
     private fun resetSwap() {
         selectedCardFromHand = null
         selectedCardFromMiddle = null
@@ -181,8 +179,6 @@ class GameScene(private val rootService: RootService) : BoardGameScene(1920, 108
             removeHoverEffect(cardView, showFront = true)
         }
     }
-
-
 
     private var currentPlayerHand = LinearLayout<CardView>(
         height = 251,
@@ -247,17 +243,6 @@ class GameScene(private val rootService: RootService) : BoardGameScene(1920, 108
         visual = ColorVisual(Color(0x0C2027)),
         font = Font(30, Color(0xFFFFFFF), "Staatliches")
     )
-    private val tripletGridPane = GridPane<CardView>(
-        posX = 50,
-        posY = 250,
-        columns = 3,
-        rows = 1,
-        spacing = 10,
-        layoutFromCenter = false,
-        visual = ColorVisual(Color(0x49585D))
-    ).apply {
-        addColumns(0,1)
-    }
     //player name labels
     private val currentPlayerName = Label(
         height = 50,
@@ -328,29 +313,6 @@ class GameScene(private val rootService: RootService) : BoardGameScene(1920, 108
             swapMode()
         }
     }
-//    private val overlayPane = Pane<ComponentView>(
-//        posX = 0,
-//        posY = 0,
-//        width = 1920,
-//        height = 1080,
-//        visual = ColorVisual(Color(12, 32, 39))
-//    ).apply {
-//        this.isVisible = false
-//    }
-//    private val button = Button(
-//        height = 132,
-//        width = 150,
-//        posX = 0,
-//        posY = 0,
-//        text = "asdasdasd",
-//        visual = ColorVisual(Color(0x0C2027)),
-//        font = Font(22, Color(0xFFFFFFF), "Staatliches")
-//    ).apply {
-//        onMouseClicked = {
-//            this@GameScene.overlayPane.isVisible = true
-//        }
-//    }
-
 
     init {
         addComponents(
@@ -370,8 +332,6 @@ class GameScene(private val rootService: RootService) : BoardGameScene(1920, 108
             drawPile,
             drawPileCount,
             endGameTest,
-//            button,
-//            overlayPane
         )
 
 
@@ -384,22 +344,27 @@ class GameScene(private val rootService: RootService) : BoardGameScene(1920, 108
         //Clear swapping selection
         selectedCardFromHand = null
         selectedCardFromMiddle = null
+        middleCards.clear()
+        discardPile.clear()
+        drawPile.clear()
 
-        cards.clear()
+        //Show the number of cards left in the drawPile
+        drawPileCount.text = game.drawPile.size.toString()
         //Create the CardViews for each value and suit combination
         // and map them into the corresponding [entity.Card] objects
-        CardValue.values().forEach { value ->
-            CardSuit.values().forEach { suit ->
-                cards[Card(suit, value)] = CardView(
-                    height = 231,
-                    width = 150,
-                    front = cardImageLoader.frontImageFor(suit, value),
-                    back = cardImageLoader.backImage
-                )
-            }
+        if(cards.isEmpty()) { // for optimization because cards is reusable for restart game
+            CardValue.values().forEach { value ->
+                CardSuit.values().forEach { suit ->
+                    cards[Card(suit, value)] = CardView(
+                        height = 231,
+                        width = 150,
+                        front = cardImageLoader.frontImageFor(suit, value),
+                        back = cardImageLoader.backImage
+                    )
+                }
+        }
 
-            //Show the number of cards left in the drawPile
-            drawPileCount.text = game.drawPile.size.toString()
+
 
         }
     }
@@ -521,43 +486,50 @@ class GameScene(private val rootService: RootService) : BoardGameScene(1920, 108
             middleCardIndex >= middleCards.components.size) {
             return
         }
+        currentPlayerHand.remove(cardFromHandView)
+        middleCards.add(cardFromHandView.apply {
+            removeHoverEffect(this, showFront = true)}, middleCardIndex)
 
 
-        //movement animation from hand to middle
-        val animation = (MovementAnimation.toComponentView(
-            componentView = cardFromHandView,
-            toComponentViewPosition = middleCards.components[middleCardIndex], //Select the location of cardFromMiddleView as target of the animation
-            scene = this,
-            duration = 1800
-        ).apply {
-            onFinished = {
-                //remove the CardView from currentPlayerHand
-                currentPlayerHand.remove(cardFromHandView)
-                middleCards.add(cardFromHandView.apply {
-                    removeHoverEffect(this, showFront = true)
-                }, middleCardIndex)
-            }
-        })
+        middleCards.remove(cardFromMiddleView)
+        currentPlayerHand.add(cardFromMiddleView.apply {
+                   applyHoverEffect(this) }, handCardIndex)
 
-       val animation2 = (MovementAnimation.toComponentView(
-            componentView = cardFromMiddleView,
-            toComponentViewPosition = currentPlayerHand.components[handCardIndex], //Select the location of handCardIndex  as target of the animation
-            scene = this,
-            duration = 1800
-        ).apply {
-            onFinished = {
 
-                middleCards.remove(cardFromMiddleView)
-                currentPlayerHand.add(cardFromMiddleView.apply {
-                    applyHoverEffect(this)
-                }, handCardIndex)
-            }
-        })
-
-       lock()
-       this.playAnimation(SequentialAnimation(animation, animation2)) //The animations take place parallel,
-       unlock()                                                     //not to complicate the indexing of CardViews in both containers
-
+//        //Movement animation from hand to middle
+//        val animation = (MovementAnimation.toComponentView(
+//            componentView = cardFromHandView,
+//            toComponentViewPosition = middleCards.components[middleCardIndex], //Select the location of cardFromMiddleView as target of the animation
+//            scene = this,
+//            duration = 1800
+//        ).apply {
+//            onFinished = {
+//                //Remove the CardView from currentPlayerHand
+//                currentPlayerHand.remove(cardFromHandView)
+//                middleCards.add(cardFromHandView.apply {
+//                    removeHoverEffect(this, showFront = true)
+//                }, middleCardIndex)
+//
+//            }
+//        })
+//
+//       val animation2 = (MovementAnimation.toComponentView(
+//            componentView = cardFromMiddleView,
+//            toComponentViewPosition = currentPlayerHand.components[handCardIndex], //Select the location of handCardIndex  as target of the animation
+//            scene = this,
+//            duration = 1800
+//        ).apply {
+//            onFinished = {
+//                middleCards.remove(cardFromMiddleView)
+//                currentPlayerHand.add(cardFromMiddleView.apply {
+//                    applyHoverEffect(this)
+//                }, handCardIndex)
+//            }
+//        })
+//        lock()
+//        this.playAnimation(ParallelAnimation(animation, animation))
+//        unlock()
+//
 
     }
     override fun refreshAfterDiscardCard(discardedCard: Card) {
@@ -584,7 +556,7 @@ class GameScene(private val rootService: RootService) : BoardGameScene(1920, 108
         val targetPosition = if (currentPlayerHand.components.isNotEmpty()) {
             currentPlayerHand.components.last()
         } else {
-            // If the hand is empty, use the position where the first card would be added
+            //If the hand is empty, use the position where the first card would be added
             currentPlayerHand
         }
 
