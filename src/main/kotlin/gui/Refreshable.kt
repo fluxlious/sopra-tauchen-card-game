@@ -51,8 +51,11 @@ interface Refreshable {
     fun refreshAfterDiscardPrompt(currentPlayer : Player){
     }
 
-    /** Refreshes the GUI after the game has ended */
-    fun refreshAfterEndGame(){}
+    /** Refreshes the GUI after the game has ended
+     *
+     * @param winner the winner player that will be shown in the [ResultMenuScene]
+     */
+    fun refreshAfterEndGame(winner : Player){}
 
     /** Refreshes the GUI after the game has been restarted. */
     fun refreshAfterGameRestart() {}

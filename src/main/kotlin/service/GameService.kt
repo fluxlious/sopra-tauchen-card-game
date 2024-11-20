@@ -92,10 +92,19 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
     fun endGame(){
         val game = rootService.currentGame
         checkNotNull(game)
+        var winner : Player
         game.isGameOver =true
+        if(game.players[0].score > game.players[1].score){
+           winner = game.players[0]
+        }
+        else{
+            winner = game.players[1]
+        }
 
         //Trigger refresh to tell the GUI that the turn has ended and shows the ResultGameScene (not yet implemented)
-        onAllRefreshables { refreshAfterEndGame() }
+        onAllRefreshables {
+            refreshAfterEndGame(winner)
+        }
     }
 
     /**

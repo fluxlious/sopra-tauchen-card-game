@@ -227,6 +227,7 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
             currentPlayer.hasSwapped = true
             currentPlayer.hasActionTaken = true
             onAllRefreshables { refreshAfterSwapCard(cardFromHand, cardFromMiddle) }
+            onAllRefreshables { refreshAfterSwapCard(cardFromHand, cardFromMiddle) }
 
         }
         else{
