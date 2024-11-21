@@ -3,7 +3,6 @@ package gui
 import entity.Player
 import service.RootService
 import tools.aqua.bgw.core.BoardGameApplication
-import tools.aqua.bgw.dialog.Dialog
 
 class SopraApplication : BoardGameApplication("SoPra Game"), Refreshable {
     private val rootService = RootService()
@@ -16,6 +15,7 @@ class SopraApplication : BoardGameApplication("SoPra Game"), Refreshable {
 
 
     init {
+        loadFont("Staatliches-Regular.ttf")
         rootService.addRefreshables(
             this,
             mainMenuScene,

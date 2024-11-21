@@ -9,9 +9,11 @@ import service.CardImageLoader
 import service.RootService
 
 import tools.aqua.bgw.animation.MovementAnimation
+import tools.aqua.bgw.components.ComponentView
 import tools.aqua.bgw.components.container.CardStack
 import tools.aqua.bgw.components.container.LinearLayout
 import tools.aqua.bgw.components.gamecomponentviews.CardView
+import tools.aqua.bgw.components.layoutviews.Pane
 import tools.aqua.bgw.components.uicomponents.Button
 import tools.aqua.bgw.components.uicomponents.Label
 import tools.aqua.bgw.core.Alignment
@@ -20,6 +22,7 @@ import tools.aqua.bgw.util.BidirectionalMap
 import tools.aqua.bgw.util.Font
 import tools.aqua.bgw.visual.ColorVisual
 import tools.aqua.bgw.visual.ImageVisual
+import tools.aqua.bgw.visual.Visual
 import java.awt.Color
 
 
@@ -27,21 +30,23 @@ class GameScene(private val rootService: RootService) : BoardGameScene(1920, 108
 
     private val cardImageLoader: CardImageLoader = CardImageLoader()
     val cards: BidirectionalMap<Card, CardView> = BidirectionalMap()
+
     private var selectedCardFromHand: CardView? = null
     private var selectedCardFromMiddle: CardView? = null
+    private val xShift = 70// variable to move each component in x
 
     private var drawPile = CardStack<CardView>(
         height = 231,
         width = 150,
-        posX = 370,
-        posY = 425,
+        posX = 370- xShift,
+        posY = 425 ,
         visual = cardImageLoader.backImage,
     )
 
     private val drawPileCount = Label(
         height = 231,
         width = 150,
-        posX = 370,
+        posX = 370- xShift,
         posY = 425,
         text = "0",//initial value
         alignment = Alignment.CENTER,
@@ -55,7 +60,7 @@ class GameScene(private val rootService: RootService) : BoardGameScene(1920, 108
     private val discardPile: CardStack<CardView> = CardStack<CardView>(
         height = 251,
         width = 170,
-        posX = 1420,
+        posX = 1420 - xShift,
         posY = 425,
         visual = ColorVisual(255, 255, 255, 50),
         alignment = Alignment.CENTER,
@@ -82,14 +87,13 @@ class GameScene(private val rootService: RootService) : BoardGameScene(1920, 108
     private val middleCards = LinearLayout<CardView>(
         height = 251,
         width = 480,
-        posX = 750,
+        posX = 750 - xShift,
         posY = 425,
         spacing = 30,
         alignment = Alignment.CENTER,
         visual = ColorVisual(255, 255, 255, 50)
     ).apply {
 
-        //needs boolean
         dropAcceptor = { dragEvent ->
             val draggedComponent = dragEvent.draggedComponent
             val game = rootService.currentGame
@@ -117,8 +121,17 @@ class GameScene(private val rootService: RootService) : BoardGameScene(1920, 108
 
         }
 
-
     }
+    private val overlayPane = Pane<ComponentView>(
+        height = 251,
+        width = 800,
+        posX = 560- xShift,
+        posY = 750,
+        visual = ColorVisual(Color(0x81323B))
+    ).apply {
+        isVisible = false
+    }
+
 
     //swap button clicked -> swap mode activated -> two cards clicked  -> handle the card selections -> perform swap action
     // -> reset the changes after both successful and unsuccessful
@@ -183,7 +196,7 @@ class GameScene(private val rootService: RootService) : BoardGameScene(1920, 108
     private var currentPlayerHand = LinearLayout<CardView>(
         height = 251,
         width = 800,
-        posX = 560,
+        posX = 560- xShift,
         posY = 750,
         spacing = -30,
         visual = ColorVisual(255, 255, 255, 50),
@@ -193,7 +206,7 @@ class GameScene(private val rootService: RootService) : BoardGameScene(1920, 108
     private var otherPlayerHand = LinearLayout<CardView>(
         height = 251,
         width = 800,
-        posX = 560,
+        posX = 560- xShift,
         posY = 50,
         spacing = -30,
         alignment = Alignment.CENTER,
@@ -204,20 +217,20 @@ class GameScene(private val rootService: RootService) : BoardGameScene(1920, 108
 
     private var currentPlayerScoringPile = LinearLayout<CardView>(
         height = 251,
-        width = 300,
-        posX = 1420,
+        width = 350,
+        posX = 1420- xShift,
         posY = 750,
-        spacing = -110,
+        spacing = -65,
         alignment = Alignment.CENTER,
         visual = ColorVisual(255, 255, 255, 50)
 
     )
     private var otherPlayerScoringPile = LinearLayout<CardView>(
         height = 251,
-        width = 300,
-        posX = 1420,
+        width = 350,
+        posX = 1420 - xShift,
         posY = 50,
-        spacing = -110,
+        spacing = -65,
         alignment = Alignment.CENTER,
         visual = ColorVisual(255, 255, 255, 50)
 
@@ -225,7 +238,7 @@ class GameScene(private val rootService: RootService) : BoardGameScene(1920, 108
     private var currentPlayerScore = Label(
         height = 50,
         width = 170,
-        posX = 1420,
+        posX = 1420- xShift,
         posY = 1002,
         text = "Score: 0",
         alignment = Alignment.CENTER,
@@ -236,7 +249,7 @@ class GameScene(private val rootService: RootService) : BoardGameScene(1920, 108
     private var otherPlayerScore = Label(
         height = 50,
         width = 170,
-        posX = 1420,
+        posX = 1420- xShift,
         posY = 0,
         text = "Score: 0",
         alignment = Alignment.CENTER,
@@ -247,7 +260,7 @@ class GameScene(private val rootService: RootService) : BoardGameScene(1920, 108
     private val currentPlayerName = Label(
         height = 50,
         width = 200,
-        posX = 560,
+        posX = 560- xShift,
         posY = 1002,
         text = "Spieler",
         alignment = Alignment.CENTER,
@@ -259,7 +272,7 @@ class GameScene(private val rootService: RootService) : BoardGameScene(1920, 108
     private val otherPlayerName = Label(
         height = 50,
         width = 200,
-        posX = 560,
+        posX = 560- xShift,
         posY = 0,
         text = "Spieler",
         alignment = Alignment.CENTER,
@@ -267,10 +280,27 @@ class GameScene(private val rootService: RootService) : BoardGameScene(1920, 108
         font = Font(30, Color(0xFFFFFFF), "Staatliches")
 
     )
+   //test button for testing the ResultMenuScene
+    private val endGameTest = Button(
+        height = 120,
+        width = 150,
+        posX = 150,
+        posY = 0,
+        text = "endgametest",
+        alignment = Alignment.CENTER,
+        visual = ColorVisual(Color(0x0C2027)),
+        font = Font(10, Color(0xFFFFFFF), "Staatliches")
+
+    ).apply {
+        onMouseClicked = {
+            rootService.gameService.endGame()
+        }
+
+    }
     private val nextTurnButton = Button(
         height = 120,
         width = 150,
-        posX = 370,
+        posX = 370- xShift,
         posY = 750,
         text = "Next turn",
         alignment = Alignment.CENTER,
@@ -280,33 +310,54 @@ class GameScene(private val rootService: RootService) : BoardGameScene(1920, 108
     ).apply {
         onMouseClicked = {
             rootService.playerActionService.nextTurn()
-        }
+            drawPileCount.isDisabled= true // not to allow the player without clicking ready
+            overlayPane.clear()
 
-    }
-    private val endGameTest = Button(
-        height = 120,
-        width = 150,
-        posX = 0,
-        posY = 0,
-        text = "end game test",
-        alignment = Alignment.CENTER,
-        visual = ColorVisual(Color(0x0C2027)),
-        font = Font(25, Color(0xFFFFFFF), "Staatliches")
+            overlayPane.isVisible = true
+            // Add a label with the current player's name to the overlayPane
+            overlayPane.add(
+                Label(
+                    height = 65,
+                    width = 800,
+                    posX = (overlayPane.width - 800) / 2,
+                    posY = (overlayPane.height - 60) / 2 - 60,
+                    text = "${currentPlayerName.text}'s Turn",
+                    alignment = Alignment.CENTER,
+                    font = Font(65, Color(0xE7EFF2), "JetBrains Mono ExtraBold")
+                )
+            )
 
-    ).apply {
-        onMouseClicked = {
-            rootService.gameService.endGame()
+
+            overlayPane.add(
+                Button(
+                    text = "Ready",
+                    width = 200,
+                    height = 80,
+                    posX = (overlayPane.width - 200) / 2,
+                    posY = (overlayPane.height - 60) / 2 + 50,  // Slightly below the label
+                    alignment = Alignment.CENTER,
+                    font = Font(30, Color(0xE7EFF2), "JetBrains Mono ExtraBold"),
+                    visual = ColorVisual(Color(0x0C2027))
+                ).apply {
+                    onMouseClicked = {
+                       drawPileCount.isDisabled= false
+                        overlayPane.isVisible = false
+                    }
+                }
+            )
+
+
         }
 
     }
     private val swapButton = Button(
         height = 132,
         width = 150,
-        posX = 370,
+        posX = 370- xShift,
         posY = 750 + 120 + 50,
         text = "Swap card",
         visual = ColorVisual(Color(0x0C2027)),
-        font = Font(22, Color(0xFFFFFFF), "Staatliches")
+        font = Font(24, Color(0xFFFFFFF), "Staatliches")
 
     ).apply {
         onMouseClicked = {
@@ -332,6 +383,7 @@ class GameScene(private val rootService: RootService) : BoardGameScene(1920, 108
             drawPile,
             drawPileCount,
             endGameTest,
+            overlayPane,
         )
 
 
@@ -350,16 +402,19 @@ class GameScene(private val rootService: RootService) : BoardGameScene(1920, 108
 
         //Show the number of cards left in the drawPile
         drawPileCount.text = game.drawPile.size.toString()
+
         //Create the CardViews for each value and suit combination
         // and map them into the corresponding [entity.Card] objects
-        if(cards.isEmpty()) { // for optimization because cards is reusable for restart game
+        if(cards.isEmpty()) {// check for optimization because [cards] is reusable for restart game
+            val preLoadedBackImage : Visual = cardImageLoader.backImage //Load the back image once for faster loading
+
             CardValue.values().forEach { value ->
                 CardSuit.values().forEach { suit ->
                     cards[Card(suit, value)] = CardView(
                         height = 231,
                         width = 150,
                         front = cardImageLoader.frontImageFor(suit, value),
-                        back = cardImageLoader.backImage
+                        back  = preLoadedBackImage
                     )
                 }
         }
@@ -622,6 +677,17 @@ class GameScene(private val rootService: RootService) : BoardGameScene(1920, 108
         currentPlayerScore.text = "Score: ${currentPlayer.score}"
         otherPlayerScore.text = "Score: ${otherPlayer.score}"
 
+    }
+    private fun lockComponents(){
+        this.components.forEach { component ->
+            if(component !is Button)
+            component.isDisabled = true
+        }
+    }
+    private fun unlockComponents(){
+        this.components.forEach { component ->
+            component.isDisabled = false
+        }
     }
 }
 
