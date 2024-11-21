@@ -19,19 +19,20 @@ interface Refreshable {
 
     /** Refreshes the GUI after a card has been played.
      *
-     * @param playedCard the [Card] has been played
+     * @param playedCard the [Card] has been played.
      */
     fun refreshAfterPlayCard(playedCard: Card){}
 
-    //TODO add kdoc for refreshAfterTakeTrio
+    /** Refreshes the GUI after a trio is collected to the scoringPile. */
     fun refreshAfterTakeTrio(){}
+
     /** Refreshes the GUI after a card has been played.
      *
      * @param drawnCard the [Card] has been drawn
      */
     fun refreshAfterDrawCard(drawnCard: Card){}
 
-    /** Refreshes the GUI after a swap action has taken place
+    /** Refreshes the GUI after a swap action has taken place.
      *
      * @param cardFromHand the [Card] that is selected from the hand for swap action
      * @param cardFromMiddle the [Card] that is selected from the middle for swap action
