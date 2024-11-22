@@ -62,8 +62,6 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
         val game = rootService.currentGame
         checkNotNull(game)
 
-        //println("${game.players[game.currentPlayerIndex].name} starts")
-        println(game.players[game.currentPlayerIndex].hand)
         //Trigger refresh to tell the GUI that the turn has started
         onAllRefreshables {refreshAfterStartTurn() }
 
@@ -80,6 +78,7 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
         if(game.drawPile.isEmpty()){
             endGame()
         }
+
         //Points to the next player
         game.currentPlayerIndex = (game.currentPlayerIndex + 1) % 2
 
@@ -95,13 +94,13 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
     fun endGame(){
         val game = rootService.currentGame
         checkNotNull(game)
-        var winner : Player
+
         game.isGameOver =true
-        if(game.players[0].score > game.players[1].score){
-           winner = game.players[0]
-        }
-        else{
-            winner = game.players[1]
+
+        val winner : Player = if(game.players[0].score > game.players[1].score){
+            game.players[0]
+        } else{
+            game.players[1]
         }
 
         //Trigger refresh to tell the GUI that the turn has ended and shows the ResultGameScene (not yet implemented)

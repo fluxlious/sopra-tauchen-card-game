@@ -341,6 +341,8 @@ class GameScene(private val rootService: RootService) : BoardGameScene(1920, 108
     )
 
     private fun overlayHandCards(){
+        val game = rootService.currentGame
+        checkNotNull(game)
         overlayPane.clear()
 
         overlayPane.isVisible = true
@@ -352,7 +354,7 @@ class GameScene(private val rootService: RootService) : BoardGameScene(1920, 108
                 width = 800,
                 posX = (overlayPane.width - 800) / 2,
                 posY = (overlayPane.height - 60) / 2 - 60,
-                text = "${currentPlayerName.text}'s Turn",
+                text = "${game.players[game.currentPlayerIndex].name}'s Turn",
                 alignment = Alignment.CENTER,
                 font = Font(65, Color(0xE7EFF2), "Staatliches")
 
