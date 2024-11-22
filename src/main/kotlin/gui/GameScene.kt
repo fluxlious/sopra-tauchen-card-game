@@ -65,7 +65,15 @@ class GameScene(private val rootService: RootService) : BoardGameScene(1920, 108
         font = Font(80, Color(0xE7EFF2), "Staatliches")
     ).apply {
         onMouseClicked = {
-            rootService.playerActionService.drawCard()
+            try {
+                rootService.playerActionService.drawCard()
+            }
+            catch (e: Exception) {
+                errorPrompt.add(messageLabel)
+                errorPrompt.add(okButton)
+
+                showPromptMessage(e.message.toString())//Set the error message to the label in the error pane
+            }
         }
     }
 
@@ -83,9 +91,12 @@ class GameScene(private val rootService: RootService) : BoardGameScene(1920, 108
             val game = rootService.currentGame
             checkNotNull(game)
             //accept the dropping a card if the player has more than 8 cards in the hand
-            if (draggedComponent is CardView) {
-                game.players[game.currentPlayerIndex].hand.size > 8
+            if (game.players[game.currentPlayerIndex].hand.size > 8) {
+                true
             } else {
+                errorPrompt.add(messageLabel)
+                errorPrompt.add(okButton)
+                showPromptMessage("You cant discard a card")
                 false
             }
         }
@@ -101,19 +112,21 @@ class GameScene(private val rootService: RootService) : BoardGameScene(1920, 108
     //This linear layout holds the middle cards' CardView objects.
     private val middleCards = LinearLayout<CardView>(
         height = 251,
-        width = 480,
-        posX = 750 - xShift,
+        width = 500,
+        posX = 720,
         posY = 425,
         spacing = 30,
         alignment = Alignment.CENTER,
         visual = ColorVisual(255, 255, 255, 50)
     ).apply {
+
         //Accept the dropping a card when the card is a valid play
         //Also accept if the player has taken action but tries to drag the last drawn card.
         dropAcceptor = { dragEvent ->
-            val draggedComponent = dragEvent.draggedComponent
             val game = rootService.currentGame
             checkNotNull(game)
+            val draggedComponent = dragEvent.draggedComponent
+
             val currentPlayer = game.players[game.currentPlayerIndex]
 
 
@@ -129,9 +142,15 @@ class GameScene(private val rootService: RootService) : BoardGameScene(1920, 108
         }
         //Trigger the play card action in the service
         onDragDropped = { dragEvent ->
+            val game = rootService.currentGame
+            checkNotNull(game)
+
             val cardView = dragEvent.draggedComponent as CardView
             val card = cards.backward(cardView)
-
+            if(game.drawPile.isEmpty()){
+                rootService.playerActionService.playCard(card)
+                rootService.gameService.endGame()
+            }
             // Play the card
             rootService.playerActionService.playCard(card)
 
@@ -189,7 +208,6 @@ class GameScene(private val rootService: RootService) : BoardGameScene(1920, 108
     /**
      * This help-method triggers swapCard method by passing the Card objects of the selected CardViews
      *
-     *
      */
     private fun tryPerformSwap() {
         //both cards should be selected therefore not null.
@@ -199,9 +217,13 @@ class GameScene(private val rootService: RootService) : BoardGameScene(1920, 108
 
             try {
                 rootService.playerActionService.swapCard(cardFromHand, cardFromMiddle)
-            } catch (e: Exception) {
-                println("Swap failed: ${e.message}") //Print the error message that swapCard throws
-            } finally {
+            }
+            catch (e: Exception) {
+                errorPrompt.add(messageLabel)
+                errorPrompt.add(okButton)
+                showPromptMessage(e.message.toString())
+            }
+            finally {
                 resetSwap() //Reset the changes made to the CardViews in both fail and success cases
             }
         }
@@ -318,25 +340,44 @@ class GameScene(private val rootService: RootService) : BoardGameScene(1920, 108
 
     )
 
-   //test button for testing the ResultMenuScene
-    //will be removed once we are done.
-    private val endGameTest = Button(
-        height = 120,
-        width = 150,
-        posX = 150,
-        posY = 0,
-        text = "endgametest",
-        alignment = Alignment.CENTER,
-        visual = ColorVisual(Color(0x0C2027)),
-        font = Font(10, Color(0xFFFFFFF), "Staatliches")
+    private fun overlayHandCards(){
+        overlayPane.clear()
 
-    ).apply {
-        onMouseClicked = {
-            rootService.gameService.endGame()
-        }
+        overlayPane.isVisible = true
 
+        // Add a label with the current player's name to the overlayPane
+        overlayPane.add(
+            Label(
+                height = 65,
+                width = 800,
+                posX = (overlayPane.width - 800) / 2,
+                posY = (overlayPane.height - 60) / 2 - 60,
+                text = "${currentPlayerName.text}'s Turn",
+                alignment = Alignment.CENTER,
+                font = Font(65, Color(0xE7EFF2), "Staatliches")
+
+            )
+        )
+
+        // Add a button to allow player to play once ready.
+        overlayPane.add(
+            Button(
+                text = "Ready",
+                width = 200,
+                height = 80,
+                posX = (overlayPane.width - 200) / 2,
+                posY = (overlayPane.height - 60) / 2 + 50,  // Slightly below the label
+                alignment = Alignment.CENTER,
+                font = Font(30, Color(0xE7EFF2), "Staatliches"),
+                visual = ColorVisual(Color(0x0C2027))
+            ).apply {
+                onMouseClicked = {
+                    drawPileCount.isDisabled= false
+                    overlayPane.isVisible = false
+                }
+            }
+        )
     }
-
     //This button is used to advance into the turn of the next player
     private val nextTurnButton = Button(
         height = 120,
@@ -350,49 +391,54 @@ class GameScene(private val rootService: RootService) : BoardGameScene(1920, 108
 
     ).apply {
         onMouseClicked = {
-            rootService.playerActionService.nextTurn()
-            drawPileCount.isDisabled= true // not to allow the player without clicking ready
-            overlayPane.clear()
-
-            overlayPane.isVisible = true
-
-            // Add a label with the current player's name to the overlayPane
-            overlayPane.add(
-                Label(
-                    height = 65,
-                    width = 800,
-                    posX = (overlayPane.width - 800) / 2,
-                    posY = (overlayPane.height - 60) / 2 - 60,
-                    text = "${currentPlayerName.text}'s Turn",
-                    alignment = Alignment.CENTER,
-                    font = Font(65, Color(0xE7EFF2), "JetBrains Mono ExtraBold")
-                )
-            )
-
-            // Add a button to allow player to play once ready.
-            overlayPane.add(
-                Button(
-                    text = "Ready",
-                    width = 200,
-                    height = 80,
-                    posX = (overlayPane.width - 200) / 2,
-                    posY = (overlayPane.height - 60) / 2 + 50,  // Slightly below the label
-                    alignment = Alignment.CENTER,
-                    font = Font(30, Color(0xE7EFF2), "JetBrains Mono ExtraBold"),
-                    visual = ColorVisual(Color(0x0C2027))
-                ).apply {
-                    onMouseClicked = {
-                       drawPileCount.isDisabled= false
-                        overlayPane.isVisible = false
-                    }
-                }
-            )
-
+            try {
+                rootService.playerActionService.nextTurn()
+            }
+            catch(e : Exception){
+                errorPrompt.add(messageLabel)
+                errorPrompt.add(okButton)
+                showPromptMessage(e.message.toString())//Set the error message to the label in the error pane
+            }
 
         }
-
     }
 
+    private var errorPrompt = Pane<ComponentView>(
+        height = 200, // Height of the popup
+        width = 400,  // Width of the popup
+        posX = (1920 / 2) - (400 / 2), // Center the popup horizontally on screen
+        posY = (1080 / 2) - (200 / 2), // Center the popup vertically on screen
+        visual = ColorVisual(Color(12, 32, 39, 230)) // Background color
+    ).apply {
+        isVisible = false // Initially hidden
+    }
+
+    // Initialize the messageLabel
+    private val messageLabel = Label(
+        height = 30,
+        width = 400,
+        posX = (400 / 2) - (400 / 2), // Center horizontally relative to the parent container
+        posY = 70, // Position the label
+        text = "",
+        font = Font(30, Color(255,255,255), "Staatliches")
+    )
+
+    // Add the OK button
+    private val okButton = Button(
+        height = 50,
+        width = 100,
+        posX = (400 / 2) - 50, // Center horizontally relative to the parent container
+        posY = 120, // Position below the label
+        text = "OK",
+        visual = ColorVisual(Color(129, 50, 59, 230)), // Background color
+        font = Font(30, Color(255,255,255), "Staatliches")
+    ).apply {
+        onMouseClicked = {
+
+            errorPrompt.isVisible = false // Hide the prompt when the button is clicked
+            errorPrompt.clear()
+        }
+    }
     // This button is used to get into the swapping mode.
     private val swapButton = Button(
         height = 132,
@@ -426,8 +472,8 @@ class GameScene(private val rootService: RootService) : BoardGameScene(1920, 108
             middleCards,
             drawPile,
             drawPileCount,
-            endGameTest,
-            overlayPane,
+            errorPrompt,
+            overlayPane
         )
 
 
@@ -448,10 +494,8 @@ class GameScene(private val rootService: RootService) : BoardGameScene(1920, 108
         middleCards.clear()
         discardPile.clear()
         drawPile.clear()
-
         //Show the number of cards in the drawPile
         drawPileCount.text = game.drawPile.size.toString()
-
         //Create the CardViews for each value and suit combination
         //and map them into the corresponding [entity.Card] objects
         if(cards.isEmpty()) {// check for optimization because [cards] is reusable for restart game
@@ -477,8 +521,8 @@ class GameScene(private val rootService: RootService) : BoardGameScene(1920, 108
         //Get the current game from the rootService
         val game = rootService.currentGame ?: return
 
+        drawPileCount.isDisabled = true // gets enabled once the player clicks on the ready button
         //Set the currentPlayer components for the new current player
-        currentPlayerName.text = game.players[game.currentPlayerIndex].name
         currentPlayerHand.clear()
         currentPlayerScoringPile.clear()
 
@@ -487,16 +531,23 @@ class GameScene(private val rootService: RootService) : BoardGameScene(1920, 108
         selectedCardFromHand = null
         selectedCardFromMiddle = null
 
+        overlayHandCards()
+
         //Get the index of other player with modulo
         val otherPlayer = game.players[(game.currentPlayerIndex + 1) % 2]
+
         //Set the otherPlayer components for the new other player
         otherPlayerName.text = otherPlayer.name
         otherPlayerHand.clear()
         otherPlayerScoringPile.clear()
 
         //Update both of the scores
-        updateScoreView()
+        updateScoreAndNameView()
 
+        //if middle empty swap is not allowed
+        if(game.middleCards.isEmpty()){
+            swapButton.isDisabled = true
+        }
         //Show the cards in the hand with corresponding CardView objects
         game.players[game.currentPlayerIndex].hand.forEach { card ->
             currentPlayerHand.add((cards[card] as CardView).apply {
@@ -583,7 +634,7 @@ class GameScene(private val rootService: RootService) : BoardGameScene(1920, 108
 
 
         }
-       updateScoreView()
+       updateScoreAndNameView()
     }
 
     /**
@@ -604,56 +655,23 @@ class GameScene(private val rootService: RootService) : BoardGameScene(1920, 108
 
         if (handCardIndex < 0 || middleCardIndex < 0 ||
             handCardIndex >= currentPlayerHand.components.size ||
-            middleCardIndex >= middleCards.components.size) {
+            middleCardIndex >= middleCards.components.size
+        ) {
             return
         }
         currentPlayerHand.remove(cardFromHandView)
         middleCards.add(cardFromHandView.apply {
-            removeHoverEffect(this, showFront = true)}, middleCardIndex)
+            removeHoverEffect(this, showFront = true)
+        }, middleCardIndex)
 
 
         middleCards.remove(cardFromMiddleView)
         currentPlayerHand.add(cardFromMiddleView.apply {
-                   applyHoverEffect(this) }, handCardIndex)
+            applyHoverEffect(this)
+        }, handCardIndex)
 
-
-//        //Movement animation from hand to middle
-//        val animation = (MovementAnimation.toComponentView(
-//            componentView = cardFromHandView,
-//            toComponentViewPosition = middleCards.components[middleCardIndex], //Select the location of cardFromMiddleView as target of the animation
-//            scene = this,
-//            duration = 1800
-//        ).apply {
-//            onFinished = {
-//                //Remove the CardView from currentPlayerHand
-//                currentPlayerHand.remove(cardFromHandView)
-//                middleCards.add(cardFromHandView.apply {
-//                    removeHoverEffect(this, showFront = true)
-//                }, middleCardIndex)
-//
-//            }
-//        })
-//
-//       val animation2 = (MovementAnimation.toComponentView(
-//            componentView = cardFromMiddleView,
-//            toComponentViewPosition = currentPlayerHand.components[handCardIndex], //Select the location of handCardIndex  as target of the animation
-//            scene = this,
-//            duration = 1800
-//        ).apply {
-//            onFinished = {
-//                middleCards.remove(cardFromMiddleView)
-//                currentPlayerHand.add(cardFromMiddleView.apply {
-//                    applyHoverEffect(this)
-//                }, handCardIndex)
-//            }
-//        })
-//        lock()
-//        this.playAnimation(ParallelAnimation(animation, animation))
-//        unlock()
-//
 
     }
-
     /**
      * This method is called by the [service.GameService] when a card has been discarded into discardPile
      *
@@ -676,10 +694,10 @@ class GameScene(private val rootService: RootService) : BoardGameScene(1920, 108
      */
     override fun refreshAfterDrawCard(drawnCard: Card) {
         val game = rootService.currentGame ?: return
-        val drawnCard = (cards[drawnCard] as CardView)
+        val drawnCardView = (cards[drawnCard] as CardView)
 
         //Add the drawnCard into drawPile just to animate it correctly by selecting drawPile as the source of animation
-        drawPile.add(drawnCard)
+        drawPile.add(drawnCardView)
 
         //Player has taken action so swapping is disabled
         swapButton.isDisabled = true
@@ -697,7 +715,7 @@ class GameScene(private val rootService: RootService) : BoardGameScene(1920, 108
         // Moving animation of the drawnCard to currentPlayerHand (targetPosition)
         this.playAnimation(
             MovementAnimation.toComponentView(
-                componentView = drawnCard,
+                componentView = drawnCardView,
                 toComponentViewPosition = targetPosition,// either to the last CardView object or to the first
                 scene = this,
                 duration = 1150
@@ -705,9 +723,9 @@ class GameScene(private val rootService: RootService) : BoardGameScene(1920, 108
                 onFinished = {
                     //remove the CardView from drawPile
                     //add it to currentPlayer
-                    drawnCard.removeFromParent()
-                    currentPlayerHand.add(drawnCard)
-                    applyHoverEffect(drawnCard)
+                    drawnCardView.removeFromParent()
+                    currentPlayerHand.add(drawnCardView)
+                    applyHoverEffect(drawnCardView)
                     unlock()
 
                 }
@@ -755,15 +773,25 @@ class GameScene(private val rootService: RootService) : BoardGameScene(1920, 108
         }
 
     /**
-     * This help-method updates the score labels for both player
+     * This help-method updates the score labels and name labels for both player
      */
-    private fun updateScoreView() {
+    private fun updateScoreAndNameView() {
         val game = rootService.currentGame ?: return
+
         val currentPlayer = game.players[game.currentPlayerIndex]
         val otherPlayer = game.players[(game.currentPlayerIndex + 1) % 2]
 
+        currentPlayerName.text = currentPlayer.name
+        otherPlayerName.text = otherPlayer.name
+
         currentPlayerScore.text = "Score: ${currentPlayer.score}"
         otherPlayerScore.text = "Score: ${otherPlayer.score}"
+
+    }
+    private fun showPromptMessage(message : String) {
+        val messageLabel = errorPrompt.find { it is Label } as Label // find the label in the pane
+        messageLabel.text = message //set the new message
+        errorPrompt.isVisible = true
 
     }
 
