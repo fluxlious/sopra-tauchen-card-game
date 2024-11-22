@@ -113,10 +113,10 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
         val currentPlayer = game.players[game.currentPlayerIndex]
 
         if(game.drawPile.isEmpty()) {
-            throw IllegalStateException("Draw pile is empty")
+            throw IllegalStateException("Draw pile is empty!")
         }
         if(currentPlayer.hasActionTaken){
-            throw IllegalStateException("Action taken")
+            throw IllegalStateException("You have already taken an action!")
         }
         val drawnCard = game.drawPile.pop() // draw the card from drawPile
 
@@ -125,9 +125,9 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
         currentPlayer.lastDrawnCard = drawnCard
         onAllRefreshables { refreshAfterDrawCard(drawnCard) }
         // if the drawPile is empty after the draw, we set the game over but allow playing the card
-        if(game.drawPile.isEmpty()){
-            playLastCard()
-        }
+//        if(game.drawPile.isEmpty()){
+//            playLastCard()
+//        }
 
     }
 
@@ -140,36 +140,36 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
      *
      * @throws IllegalStateException if no game is active
      */
-    private fun playLastCard() {
-        val game = rootService.currentGame
-        checkNotNull(game)
-        val currentPlayer = game.players[game.currentPlayerIndex]
-        val lastDrawnCard = currentPlayer.lastDrawnCard
-        checkNotNull(lastDrawnCard) { "No last drawn card to play." }
-
-        // Check if the last drawn card can be played
-        if (!isCardValid(lastDrawnCard)) {
-            // If the last drawn card cannot be played, end the game
-            rootService.gameService.endGame()
-            return
-        }
-
-        // Play the card to the middle if it's valid
-        game.middleCards.add(lastDrawnCard)
-        currentPlayer.hand.remove(lastDrawnCard)
-        currentPlayer.lastDrawnCard = null
-        onAllRefreshables {
-            refreshAfterPlayCard(lastDrawnCard)
-        }
-
-        // Check if the placement forms a trio and take it if valid
-        if (game.middleCards.size == 3) {
-            takeTrioAndAddToScoringPile()
-
-
-        }
-        rootService.gameService.endGame()
-    }
+//    private fun playLastCard() {
+//        val game = rootService.currentGame
+//        checkNotNull(game)
+//        val currentPlayer = game.players[game.currentPlayerIndex]
+//        val lastDrawnCard = currentPlayer.lastDrawnCard
+//        checkNotNull(lastDrawnCard) { "No last drawn card to play." }
+//
+//        // Check if the last drawn card can be played
+//        if (!isCardValid(lastDrawnCard)) {
+//            // If the last drawn card cannot be played, end the game
+//            rootService.gameService.endGame()
+//            return
+//        }
+//
+//        // Play the card to the middle if it's valid
+//        game.middleCards.add(lastDrawnCard)
+//        currentPlayer.hand.remove(lastDrawnCard)
+//        currentPlayer.lastDrawnCard = null
+//        onAllRefreshables {
+//            refreshAfterPlayCard(lastDrawnCard)
+//        }
+//
+//        // Check if the placement forms a trio and take it if valid
+//        if (game.middleCards.size == 3) {
+//            takeTrioAndAddToScoringPile()
+//
+//
+//        }
+//        rootService.gameService.endGame()
+//    }
    /** Swaps a card from the current player's hand with a card from the middle if the swap is valid.
     * The swap is allowed if the player has not already swapped or taken an action in the current turn.
     *
@@ -195,7 +195,7 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
         val middleCards = game.middleCards
 
         if (currentPlayer.hasSwapped) {
-            throw IllegalStateException("You have already swapped this round.")
+            throw IllegalStateException("You have already swapped this round!")
         }
 
         if(middleCards.isEmpty()){
@@ -203,7 +203,7 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
         }
 
         if (currentPlayer.hasActionTaken) {
-            throw IllegalStateException("You have already taken an action this turn.")
+            throw IllegalStateException("You have already taken an action!")
         }
 
         // Ensure the selected cards are in the correct locations
@@ -221,8 +221,6 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
             currentPlayer.hand[handCardIndex] = cardFromMiddle
             middleCards[middleCardIndex] = cardFromHand
 
-            println("Middle: " + game.middleCards)
-            println("Hand of ${currentPlayer.name} ${currentPlayer.hand}")
             // Mark the swap as used and action taken
             currentPlayer.hasSwapped = true
             currentPlayer.hasActionTaken = true
@@ -231,7 +229,7 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
 
         }
         else{
-            throw IllegalArgumentException("The card is not valid")
+            throw IllegalArgumentException("Try again, the cards are not valid")
         }
 
 
@@ -282,10 +280,11 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
         val currentPlayer = game.players[game.currentPlayerIndex]
 
         if(!currentPlayer.hand.contains(card)){
-
             throw IllegalArgumentException("The card is not in the hand")
         }
-
+        if(currentPlayer.hand.size < 8){
+            throw IllegalArgumentException("You can't discard a card.")
+        }
         currentPlayer.hand.remove(card)
         game.discardPile.push(card)
         onAllRefreshables { refreshAfterDiscardCard(card) }
@@ -326,18 +325,16 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
         val currentPlayer = game.players[game.currentPlayerIndex]
         if(currentPlayer.hasActionTaken){
             if(currentPlayer.hand.size > 8){
-                onAllRefreshables { refreshAfterDiscardPrompt(currentPlayer) }
-                throw IllegalStateException("You need to discard a card before ending the turn")
+                throw IllegalStateException("You need to discard a card!")
             }
             currentPlayer.hasActionTaken = false
             currentPlayer.hasSwapped = false
             currentPlayer.lastDrawnCard = null
 
             rootService.gameService.endTurn()
-            println(" after next Turn middle: " + game.middleCards)
         }
         else{
-            throw IllegalStateException("You didnt perform any action.")
+            throw IllegalStateException("You didn't perform any action!")
         }
 
     }

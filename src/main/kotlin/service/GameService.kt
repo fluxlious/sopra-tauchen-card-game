@@ -77,6 +77,9 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
         val currentPlayer = game.players[game.currentPlayerIndex]
         println("${currentPlayer.name} ends the turn")
 
+        if(game.drawPile.isEmpty()){
+            endGame()
+        }
         //Points to the next player
         game.currentPlayerIndex = (game.currentPlayerIndex + 1) % 2
 
