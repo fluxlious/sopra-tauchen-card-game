@@ -4,11 +4,8 @@ import entity.Player
 import service.RootService
 import tools.aqua.bgw.core.BoardGameApplication
 
-
-
 /**
  *  The class of the main application that all scenes are connected, and manages the scenes.
- *
  *
  */
 class SopraApplication : BoardGameApplication("SoPra Game"), Refreshable {
@@ -46,7 +43,6 @@ class SopraApplication : BoardGameApplication("SoPra Game"), Refreshable {
     override fun refreshAfterStartNewGame() {
         hideMenuScene(750)
         this.showGameScene(gameScene)
-
 
     }
 

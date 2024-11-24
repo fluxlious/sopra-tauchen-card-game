@@ -87,7 +87,6 @@ class GameScene(private val rootService: RootService) : BoardGameScene(1920, 108
         alignment = Alignment.CENTER,
     ).apply {
         dropAcceptor = { dragEvent ->
-            val draggedComponent = dragEvent.draggedComponent
             val game = rootService.currentGame
             checkNotNull(game)
             //accept the dropping a card if the player has more than 8 cards in the hand
@@ -340,6 +339,10 @@ class GameScene(private val rootService: RootService) : BoardGameScene(1920, 108
 
     )
 
+    /**
+     * This helper method puts a overlay with a button that hides the current player cards when the turn changes
+     *
+     */
     private fun overlayHandCards(){
         val game = rootService.currentGame
         checkNotNull(game)
@@ -396,7 +399,7 @@ class GameScene(private val rootService: RootService) : BoardGameScene(1920, 108
             try {
                 rootService.playerActionService.nextTurn()
             }
-            catch(e : Exception){
+            catch(e : Exception){ //prompts the error message to the pane
                 errorPrompt.add(messageLabel)
                 errorPrompt.add(okButton)
                 showPromptMessage(e.message.toString())//Set the error message to the label in the error pane
@@ -405,6 +408,7 @@ class GameScene(private val rootService: RootService) : BoardGameScene(1920, 108
         }
     }
 
+    // Used to prompt errors according to the action
     private var errorPrompt = Pane<ComponentView>(
         height = 200, // Height of the popup
         width = 400,  // Width of the popup

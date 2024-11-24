@@ -45,13 +45,6 @@ interface Refreshable {
      */
     fun refreshAfterDiscardCard(discardedCard : Card){}
 
-    /** Refreshes the GUI and pops a prompt that the player need to discard before ending the turn
-     *
-     * @param currentPlayer the player that the prompt will be shown
-     */
-    fun refreshAfterDiscardPrompt(currentPlayer : Player){
-    }
-
     /** Refreshes the GUI after the game has ended
      *
      * @param winner the winner player that will be shown in the [ResultMenuScene]
