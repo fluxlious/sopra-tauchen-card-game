@@ -5,21 +5,13 @@ Software Praktikum (SoPra) at TU Dortmund, winter term 2024/25.
 
 ## Screenshots
 
-![The main menu, a turn in progress, and the turn-change overlay](docs/screenshots/preview.jpg)
+![A turn in progress, the turn-change overlay, and the main menu](docs/screenshots/preview.jpg)
 
 ## Scope
 
-The whole cohort implemented the same game, so it's worth being clear about what was set by the
-course and what wasn't.
-
-**Set by the course:** the rules, the GUI framework (BoardGameWork, `tools.aqua:bgw-gui`), and the
-design — the UML diagram, the layer split and the service method signatures were produced in class
-and were identical for everyone, and the implementation had to follow them without changing the
-structure. The card deck raster and two small helper classes come from the framework's sample
-project.
-
-**Mine:** the implementation of all three layers, the unit tests, and the entire interface —
-layout, interaction, animations and visual theme.
+The rules, the framework and the design — UML, layer split, service signatures — were set by the
+course, and the whole cohort built the same game. The implementation of all three layers, the
+tests and the whole interface are mine.
 
 ## The interface
 
