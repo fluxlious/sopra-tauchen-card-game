@@ -1,7 +1,7 @@
 # Tauchen — card game in Kotlin
 
-A two-player card game with a desktop GUI, written in Kotlin. Individual assignment for the
-Software Praktikum (SoPra) at TU Dortmund, winter term 2024/25.
+A two-player card game with a desktop GUI, built in Kotlin with the BoardGameWork framework.
+Individual assignment for the Software Praktikum (SoPra) at TU Dortmund, winter term 2024/25.
 
 ## Screenshots
 
